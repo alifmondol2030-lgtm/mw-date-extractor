@@ -245,7 +245,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v1.3 — Groq (meta-llama/llama-4-scout-17b-16e-instruct) · Auto-OCR Ready</span>
+  <span>v1.6 — Groq (Llama 4 Scout) · Auto-OCR · Last Result Restored</span>
 </header>
 
 <!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
@@ -319,6 +319,46 @@
     localStorage.setItem('groq_key', inp.value.trim());
     showToast('Key saved!');
   }
+
+  // ── Page Load: last result restore করো ──
+  (function restoreLastResult() {
+    try {
+      const savedDates = localStorage.getItem('mw_ocr_last_dates');
+      const savedYear  = localStorage.getItem('mw_ocr_last_year');
+      const savedTs    = localStorage.getItem('mw_ocr_last_result_ts');
+      const savedImg   = localStorage.getItem('mw_ocr_last_image');
+      const savedMime  = localStorage.getItem('mw_ocr_last_mime');
+
+      if (savedImg) {
+        // Last screenshot preview restore
+        const previewEl = document.getElementById('preview-img');
+        const dropEl    = document.getElementById('drop-zone');
+        const mimeType  = savedMime || 'image/png';
+        previewEl.src = 'data:' + mimeType + ';base64,' + savedImg;
+        dropEl.classList.add('has-image');
+        currentImageBase64 = savedImg;
+        document.getElementById('extract-btn').disabled = false;
+      }
+
+      if (savedDates) {
+        const dates = JSON.parse(savedDates);
+        const year  = savedYear || '';
+        extractedDates = dates;
+        renderDates(year, dates);
+        document.getElementById('copy-btn').disabled = dates.length === 0;
+        document.getElementById('count-display').textContent = dates.length + ' dates found';
+
+        let timeStr = '';
+        if (savedTs) {
+          const d = new Date(parseInt(savedTs));
+          timeStr = ' · ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        setStatus('done', '✓ Last result restored' + timeStr + ' — নতুন screenshot দিলে update হবে');
+      }
+    } catch(e) {
+      console.warn('[MW Extractor] restore failed:', e);
+    }
+  })();
 
   const fileInput  = document.getElementById('file-input');
   const dropZone   = document.getElementById('drop-zone');
@@ -481,6 +521,14 @@
       document.getElementById('copy-btn').disabled = false;
       document.getElementById('count-display').textContent = `${extractedDates.length} dates found`;
 
+      // ── Result localStorage এ save করো ──
+      try {
+        localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
+        localStorage.setItem('mw_ocr_last_year', parsed.year || '');
+        localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
+        console.log('[MW Extractor] Result saved to localStorage');
+      } catch(e) { console.warn('[MW Extractor] result save failed:', e); }
+
     } catch (err) {
       console.error(err);
       setStatus('error', '✗ Error: ' + err.message);
@@ -541,6 +589,14 @@
       </div>`;
     document.getElementById('count-display').textContent = '—';
     setStatus('idle', 'Upload a screenshot to get started');
+    // Saved results clear করো
+    try {
+      localStorage.removeItem('mw_ocr_last_dates');
+      localStorage.removeItem('mw_ocr_last_year');
+      localStorage.removeItem('mw_ocr_last_result_ts');
+      localStorage.removeItem('mw_ocr_last_image');
+      localStorage.removeItem('mw_ocr_last_mime');
+    } catch(e) {}
   }
 
   function setStatus(type, msg) {
