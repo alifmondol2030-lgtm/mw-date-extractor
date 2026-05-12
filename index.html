@@ -29,7 +29,6 @@
     flex-direction: column;
   }
 
-  /* ── Header ── */
   header {
     padding: 18px 32px;
     border-bottom: 1px solid var(--border);
@@ -42,7 +41,6 @@
   header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
   header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
-  /* ── Main layout ── */
   main {
     flex: 1;
     display: grid;
@@ -51,7 +49,6 @@
     height: calc(100vh - 57px);
   }
 
-  /* ── Left panel – Image ── */
   #left-panel {
     border-right: 1px solid var(--border);
     display: flex;
@@ -94,95 +91,52 @@
   #drop-zone:hover { background: rgba(0,255,136,0.03); }
   #drop-zone.has-image { justify-content: flex-start; padding: 0; }
 
-  #drop-zone .placeholder {
-    text-align: center;
-    pointer-events: none;
-  }
-  #drop-zone .placeholder .icon {
-    font-size: 3rem;
-    margin-bottom: 12px;
-    opacity: 0.3;
-  }
-  #drop-zone .placeholder p {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
+  #drop-zone .placeholder { text-align: center; pointer-events: none; }
+  #drop-zone .placeholder .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+  #drop-zone .placeholder p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
   #drop-zone .placeholder p strong { color: var(--accent); }
 
   #preview-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: none;
-    padding: 12px;
+    width: 100%; height: 100%;
+    object-fit: contain; display: none; padding: 12px;
   }
   #drop-zone.has-image #preview-img { display: block; }
   #drop-zone.has-image .placeholder { display: none; }
-
   #file-input { display: none; }
 
-  /* ── Right panel – Results ── */
-  #right-panel {
-    display: flex;
-    flex-direction: column;
-  }
+  #right-panel { display: flex; flex-direction: column; }
 
   #action-bar {
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-    align-items: center;
+    display: flex; gap: 10px; align-items: center;
   }
 
   button {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    font-weight: 700;
-    padding: 9px 18px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    transition: all 0.15s;
+    font-size: 0.78rem; font-weight: 700;
+    padding: 9px 18px; border: none; border-radius: 5px;
+    cursor: pointer; letter-spacing: 0.08em;
+    text-transform: uppercase; transition: all 0.15s;
   }
 
-  #extract-btn {
-    background: var(--accent);
-    color: #000;
-    flex: 1;
-  }
+  #extract-btn { background: var(--accent); color: #000; flex: 1; }
   #extract-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
   #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  #clear-btn {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
+  #clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   #clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
-  #copy-btn {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-  }
+  #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  /* ── Status ── */
   #status {
     padding: 10px 16px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    min-height: 36px;
+    font-size: 0.72rem; min-height: 36px;
     border-bottom: 1px solid var(--border);
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--muted); display: flex; align-items: center; gap: 8px;
   }
   #status.running { color: var(--accent2); }
   #status.done { color: var(--accent); }
@@ -190,131 +144,70 @@
 
   .spinner {
     width: 12px; height: 12px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    display: none;
+    border: 2px solid transparent; border-top-color: currentColor;
+    border-radius: 50%; animation: spin 0.6s linear infinite; display: none;
   }
   .running .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Date list ── */
   #results-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
   }
 
   .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 0.8rem;
-    gap: 10px;
-    text-align: center;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center;
   }
   .empty-state .icon { font-size: 2.5rem; opacity: 0.2; }
 
   .section-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 4px;
+    font-size: 0.65rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px;
   }
 
   .date-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    transition: border-color 0.15s;
-    animation: fadeIn 0.25s ease both;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 6px;
+    transition: border-color 0.15s; animation: fadeIn 0.25s ease both;
   }
   .date-item:hover { border-color: var(--accent); }
   @keyframes fadeIn { from { opacity:0; transform: translateX(10px); } to { opacity:1; transform: none; } }
 
-  .date-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    width: 22px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  .date-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.95rem;
-    color: var(--accent);
-    font-weight: 700;
-    flex: 1;
-  }
-
-  .date-full {
-    font-size: 0.72rem;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 22px; text-align: right; flex-shrink: 0; }
+  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
+  .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
   .raw-box {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    white-space: pre-wrap;
-    line-height: 1.7;
-    margin-top: 8px;
+    font-size: 0.75rem; color: var(--muted);
+    white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
   }
 
-  /* ── Footer ── */
   footer {
-    padding: 10px 20px;
-    border-top: 1px solid var(--border);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
+    padding: 10px 20px; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); display: flex; justify-content: space-between;
   }
   #count-display { color: var(--accent2); }
 
-  /* ── Paste notification ── */
   .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
+    position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(60px);
-    background: var(--accent);
-    color: #000;
-    padding: 10px 22px;
-    border-radius: 6px;
+    background: var(--accent); color: #000;
+    padding: 10px 22px; border-radius: 6px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    font-weight: 700;
-    transition: transform 0.3s;
-    z-index: 999;
-    pointer-events: none;
+    font-size: 0.78rem; font-weight: 700;
+    transition: transform 0.3s; z-index: 999; pointer-events: none;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* scrollbar */
   #results-area::-webkit-scrollbar { width: 4px; }
   #results-area::-webkit-scrollbar-track { background: transparent; }
   #results-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -325,11 +218,10 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v1.0 — Microworkers Assistant</span>
+  <span>v1.2 — Groq (meta-llama/llama-4-scout-17b-16e-instruct)</span>
 </header>
 
 <main>
-  <!-- LEFT: Image -->
   <div id="left-panel">
     <div class="panel-header">
       📷 Screenshot / Image
@@ -339,24 +231,22 @@
       <div class="placeholder">
         <div class="icon">🖼️</div>
         <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
-        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported</p>
+        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
       </div>
       <img id="preview-img" alt="Screenshot preview" />
     </div>
     <input type="file" id="file-input" accept="image/*">
   </div>
 
-  <!-- RIGHT: Results -->
   <div id="right-panel">
-    <div class="panel-header">
-      📋 Extracted Dates
-    </div>
+    <div class="panel-header">📋 Extracted Dates</div>
 
     <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">KEY:</span>
-      <input id="api-key-input" type="password" placeholder="sk-or-v1-..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GROQ KEY:</span>
+      <input id="api-key-input" type="password" placeholder="gsk_..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
       <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
     </div>
+
     <div id="action-bar">
       <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
       <button id="copy-btn" disabled onclick="copyAll()">📋 Copy All</button>
@@ -376,57 +266,43 @@
     </div>
 
     <footer>
-      <span>Powered by Claude AI</span>
+      <span>Powered by Groq AI (Llama 4 Scout)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
 </main>
 
-<div class="toast" id="toast">✓ Copied to clipboard!</div>
+<div class="toast" id="toast">✓ Copied!</div>
 
 <script>
-  // ── State ──
   let currentImageBase64 = null;
   let extractedDates = [];
 
-  // Load saved key
   const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('or_key') || '';
+  inp.value = localStorage.getItem('groq_key') || '';
 
   function saveKey() {
-    const k = inp.value.trim();
-    localStorage.setItem('or_key', k);
+    localStorage.setItem('groq_key', inp.value.trim());
     showToast('Key saved!');
   }
 
-  // ── File input ──
-  const fileInput = document.getElementById('file-input');
-  const dropZone  = document.getElementById('drop-zone');
+  const fileInput  = document.getElementById('file-input');
+  const dropZone   = document.getElementById('drop-zone');
   const previewImg = document.getElementById('preview-img');
 
-  fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) loadImage(file);
-  });
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
 
-  // Drag & drop
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background = 'rgba(0,255,136,0.06)'; });
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background = 'rgba(0,255,136,0.06)'; });
   dropZone.addEventListener('dragleave', () => { dropZone.style.background = ''; });
   dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.style.background = '';
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadImage(file);
+    e.preventDefault(); dropZone.style.background = '';
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) loadImage(f);
   });
 
-  // Paste support (Ctrl+V)
   document.addEventListener('paste', e => {
-    const items = e.clipboardData.items;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        loadImage(item.getAsFile());
-        break;
-      }
+    for (const item of e.clipboardData.items) {
+      if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
     }
   });
 
@@ -436,7 +312,6 @@
       const dataUrl = ev.target.result;
       previewImg.src = dataUrl;
       dropZone.classList.add('has-image');
-      // Extract base64 (remove data:image/...;base64, prefix)
       currentImageBase64 = dataUrl.split(',')[1];
       document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — click Extract Dates');
@@ -444,38 +319,42 @@
     reader.readAsDataURL(file);
   }
 
-  // ── Extract ──
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const OR_KEY = localStorage.getItem('or_key') || '';
-    if (!OR_KEY) {
-      setStatus('error', '✗ API Key নেই — উপরে KEY বক্সে দিন');
-      document.getElementById('extract-btn').disabled = false;
+    const KEY = localStorage.getItem('groq_key') || '';
+    if (!KEY) {
+      setStatus('error', '✗ Groq API Key নেই — উপরে GROQ KEY বক্সে দিন');
       return;
     }
 
-    setStatus('running', 'AI এ পাঠানো হচ্ছে...');
+    setStatus('running', 'Groq AI-তে পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
-    document.getElementById('empty-state').style.display = 'none';
-
-    const area = document.getElementById('results-area');
-    area.innerHTML = '';
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.style.display = 'none';
+    document.getElementById('results-area').innerHTML = '';
 
     try {
+      // ✅ সঠিক model name: meta-llama/llama-4-scout-17b-16e-instruct
       const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OR_KEY}`
+          'Authorization': `Bearer ${KEY}`
         },
         body: JSON.stringify({
-          model: 'llama-4-scout-17b-16e-instruct',
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
           messages: [{
             role: 'user',
             content: [
-              { type: 'image_url', image_url: { url: `data:image/png;base64,${currentImageBase64}` } },
-              { type: 'text', text: 'Look at this image. Find ALL dates in the Datum column. Dates are handwritten in format DD.MM.YY or DD.MM.26. Return ONLY JSON: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]} No explanation, just JSON.' }
+              {
+                type: 'image_url',
+                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
+              },
+              {
+                type: 'text',
+                text: 'Look at this image. Find ALL dates in the Datum column. Dates are handwritten in format DD.MM.YY or DD.MM.26. Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]}'
+              }
             ]
           }],
           temperature: 0,
@@ -485,8 +364,9 @@
 
       const data = await resp.json();
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
       const rawText = data.choices?.[0]?.message?.content || '';
-      const clean = rawText.replace(/```json|```/g,'').trim();
+      const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
       extractedDates = parsed.dates || [];
@@ -498,7 +378,7 @@
     } catch (err) {
       console.error(err);
       setStatus('error', '✗ Error: ' + err.message);
-      area.innerHTML = `<div class="raw-box">Error: ${err.message}</div>`;
+      document.getElementById('results-area').innerHTML = `<div class="raw-box">Error: ${err.message}</div>`;
     }
 
     document.getElementById('extract-btn').disabled = false;
@@ -508,8 +388,8 @@
     const area = document.getElementById('results-area');
     area.innerHTML = '';
 
-    if (!dates.length) {
-      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No dates found in this image</p></div>';
+    if (!dates || !dates.length) {
+      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
       return;
     }
 
@@ -518,15 +398,13 @@
     label.textContent = `Year: ${year || '—'} — ${dates.length} entries`;
     area.appendChild(label);
 
+    const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
     dates.forEach((d, i) => {
       const item = document.createElement('div');
       item.className = 'date-item';
       item.style.animationDelay = `${i * 0.04}s`;
-
-      const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const mNum = parseInt(d.month);
-      const mName = monthNames[mNum] || d.month;
-
+      const mName = monthNames[parseInt(d.month)] || d.month;
       item.innerHTML = `
         <div class="date-num">${d.num}</div>
         <div class="date-value">${d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`}</div>
@@ -536,14 +414,12 @@
     });
   }
 
-  // ── Copy All ──
   function copyAll() {
     if (!extractedDates.length) return;
     const text = extractedDates.map(d => d.raw || `${d.day}.${d.month}`).join('\n');
-    navigator.clipboard.writeText(text).then(() => showToast('✓ Copied to clipboard!'));
+    navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
   }
 
-  // ── Clear ──
   function clearAll() {
     currentImageBase64 = null;
     extractedDates = [];
@@ -561,14 +437,12 @@
     setStatus('idle', 'Upload a screenshot to get started');
   }
 
-  // ── Status ──
   function setStatus(type, msg) {
     const el = document.getElementById('status');
     el.className = type === 'running' ? 'running' : type === 'done' ? 'done' : type === 'error' ? 'error' : '';
     document.getElementById('status-text').textContent = msg;
   }
 
-  // ── Toast ──
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -576,6 +450,5 @@
     setTimeout(() => t.classList.remove('show'), 2000);
   }
 </script>
-
 </body>
 </html>
