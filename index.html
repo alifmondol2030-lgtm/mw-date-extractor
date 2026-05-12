@@ -341,34 +341,94 @@
   });
 
   // ═══════════════════════════════════════════════════════════════
-  // 🔥 NEW: postMessage listener — Extension থেকে ছবি receive করে
+  // 🔥 v1.4: SessionStorage থেকে auto-load (same-tab navigate)
+  //    + postMessage fallback (পুরোনো window.open পদ্ধতির জন্য)
+  //    + localStorage এ last screenshot সেভ রাখে (view করা যায়)
   // ═══════════════════════════════════════════════════════════════
-  window.addEventListener('message', function(event) {
-    // Security: only accept MW_OCR_IMAGE messages
-    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
 
-    const base64 = event.data.base64;
-    if (!base64) return;
-
-    console.log('[MW Extractor] Extension থেকে ছবি পেয়েছি, auto extracting...');
-
-    // Show banner
-    const banner = document.getElementById('auto-banner');
-    banner.classList.add('show');
-    setTimeout(() => banner.classList.remove('show'), 5000);
-
-    // Load image into preview
-    const dataUrl = 'data:image/png;base64,' + base64;
+  function loadImageFromBase64(base64, mime) {
+    if (!base64) return false;
+    const mimeType = mime || 'image/png';
+    const dataUrl = 'data:' + mimeType + ';base64,' + base64;
     previewImg.src = dataUrl;
     dropZone.classList.add('has-image');
     currentImageBase64 = base64;
     document.getElementById('extract-btn').disabled = false;
+
+    // LocalStorage এ সর্বশেষ screenshot সেভ (আগেরটা replace হবে)
+    try {
+      localStorage.setItem('mw_ocr_last_image', base64);
+      localStorage.setItem('mw_ocr_last_mime', mimeType);
+      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
+      console.log('[MW Extractor] Last screenshot localStorage এ save হয়েছে');
+    } catch(e) {
+      console.warn('[MW Extractor] localStorage save failed:', e);
+    }
+
+    return true;
+  }
+
+  function showAutoBanner(msg) {
+    const banner = document.getElementById('auto-banner');
+    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
+  }
+
+  // ── SessionStorage check (same-tab navigate এর পর) ──
+  (function checkSessionStorage() {
+    try {
+      const base64 = sessionStorage.getItem('mw_ocr_pending');
+      const mime   = sessionStorage.getItem('mw_ocr_mime') || 'image/png';
+      const ts     = sessionStorage.getItem('mw_ocr_ts');
+
+      if (!base64) return;
+
+      // পুরোনো timestamp হলে ignore (৬০ সেকেন্ডের বেশি পুরোনো)
+      if (ts && (Date.now() - parseInt(ts)) > 60000) {
+        console.log('[MW Extractor] SessionStorage image too old, ignoring');
+        sessionStorage.removeItem('mw_ocr_pending');
+        sessionStorage.removeItem('mw_ocr_mime');
+        sessionStorage.removeItem('mw_ocr_ts');
+        return;
+      }
+
+      console.log('[MW Extractor] SessionStorage থেকে নতুন screenshot পেয়েছি!');
+
+      // Use করার পর clear করো (পরের বার যেন পুরোনোটা না দেখায়)
+      sessionStorage.removeItem('mw_ocr_pending');
+      sessionStorage.removeItem('mw_ocr_mime');
+      sessionStorage.removeItem('mw_ocr_ts');
+
+      const loaded = loadImageFromBase64(base64, mime);
+      if (!loaded) return;
+
+      showAutoBanner('⚡ নতুন Screenshot পেয়েছি — Auto Extracting...');
+      setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+
+      // Auto extract
+      setTimeout(() => { extractDates(); }, 800);
+
+    } catch(e) {
+      console.warn('[MW Extractor] SessionStorage read error:', e);
+    }
+  })();
+
+  // ── postMessage fallback (পুরোনো window.open পদ্ধতির জন্য) ──
+  window.addEventListener('message', function(event) {
+    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
+    const base64 = event.data.base64;
+    if (!base64) return;
+
+    console.log('[MW Extractor] postMessage থেকে ছবি পেয়েছি, auto extracting...');
+
+    const loaded = loadImageFromBase64(base64, 'image/png');
+    if (!loaded) return;
+
+    showAutoBanner('⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...');
     setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
 
-    // Auto-trigger extraction after short delay
-    setTimeout(() => {
-      extractDates();
-    }, 800);
+    setTimeout(() => { extractDates(); }, 800);
   });
 
   function loadImage(file) {
