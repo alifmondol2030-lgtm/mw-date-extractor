@@ -463,47 +463,37 @@
     area.innerHTML = '';
 
     try {
-      // Load Tesseract if not loaded
-      if (!window.Tesseract) {
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js';
-          s.onload = res; s.onerror = rej;
-          document.head.appendChild(s);
-        });
-      }
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OR_KEY}`,
+          'HTTP-Referer': 'https://alifmondol2030-lgtm.github.io',
+          'X-Title': 'MW Date Extractor'
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-maverick:free',
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: `data:image/png;base64,${currentImageBase64}` } },
+              { type: 'text', text: 'Look at this image. Find ALL dates in the Datum column. Format DD.MM.YY. Return ONLY JSON: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]} No explanation, just JSON.' }
+            ]
+          }]
+        })
+      });
 
-      setStatus('running', 'Text পড়া হচ্ছে...');
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      const rawText = data.choices?.[0]?.message?.content || '';
+      const clean = rawText.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(clean);
 
-      const { data: { text } } = await Tesseract.recognize(
-        `data:image/png;base64,${currentImageBase64}`,
-        'deu+eng',
-        { logger: m => { if(m.status === 'recognizing text') setStatus('running', `OCR: ${Math.round(m.progress*100)}%`); } }
-      );
-
-      // Extract dates like DD.MM.YY or DD.MM.26
-      const dateRegex = /\b(\d{1,2})[\.\,](\d{2})[\.\,](\d{2})\b/g;
-      const found = [];
-      let match;
-      let num = 1;
-      const seen = new Set();
-      while ((match = dateRegex.exec(text)) !== null) {
-        const raw = `${match[1].padStart(2,'0')}.${match[2]}.${match[3]}`;
-        if (!seen.has(raw)) {
-          seen.add(raw);
-          found.push({ num: num++, raw, day: match[1].padStart(2,'0'), month: match[2], year: '20'+match[3] });
-        }
-      }
-
-      // Detect year
-      const yearMatch = text.match(/\b(20\d{2})\b/);
-      const year = yearMatch ? yearMatch[1] : '2026';
-
-      extractedDates = found;
-      renderDates(year, found);
-      setStatus('done', `✓ ${found.length}টি তারিখ পাওয়া গেছে`);
+      extractedDates = parsed.dates || [];
+      renderDates(parsed.year, extractedDates);
+      setStatus('done', `✓ ${extractedDates.length}টি তারিখ পাওয়া গেছে`);
       document.getElementById('copy-btn').disabled = false;
-      document.getElementById('count-display').textContent = `${found.length} dates found`;
+      document.getElementById('count-display').textContent = `${extractedDates.length} dates found`;
 
     } catch (err) {
       console.error(err);
