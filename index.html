@@ -521,13 +521,26 @@
       document.getElementById('copy-btn').disabled = false;
       document.getElementById('count-display').textContent = `${extractedDates.length} dates found`;
 
-      // ── Result localStorage এ save করো ──
+      // ── Result localStorage এ save করো (fallback) ──
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
         console.log('[MW Extractor] Result saved to localStorage');
       } catch(e) { console.warn('[MW Extractor] result save failed:', e); }
+
+      // ── chrome.storage.local এও save করো (FILL button এর জন্য) ──
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({
+            mw_ocr_last_dates: extractedDates,
+            mw_ocr_last_year: parsed.year || '',
+            mw_ocr_last_result_ts: Date.now()
+          }, () => {
+            console.log('[MW Extractor] Result saved to chrome.storage.local ✓');
+          });
+        }
+      } catch(e) { console.warn('[MW Extractor] chrome.storage save failed:', e); }
 
     } catch (err) {
       console.error(err);
