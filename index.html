@@ -41,6 +41,25 @@
   header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
   header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
+  /* Auto-receive banner */
+  #auto-banner {
+    display: none;
+    padding: 8px 20px;
+    background: rgba(0,255,136,0.08);
+    border-bottom: 1px solid var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.06em;
+    animation: banner-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes banner-pulse {
+    0%,100% { background: rgba(0,255,136,0.08); }
+    50%      { background: rgba(0,255,136,0.14); }
+  }
+  #auto-banner.show { display: block; }
+
   main {
     flex: 1;
     display: grid;
@@ -70,6 +89,14 @@
   .panel-header .badge {
     background: var(--accent);
     color: #000;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .panel-header .badge-blue {
+    background: var(--accent2);
+    color: #fff;
     font-size: 0.6rem;
     padding: 2px 7px;
     border-radius: 3px;
@@ -218,20 +245,27 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v1.2 — Groq (meta-llama/llama-4-scout-17b-16e-instruct)</span>
+  <span>v1.3 — Groq (meta-llama/llama-4-scout-17b-16e-instruct) · Auto-OCR Ready</span>
 </header>
+
+<!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
+<div id="auto-banner">
+  ⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...
+</div>
 
 <main>
   <div id="left-panel">
     <div class="panel-header">
       📷 Screenshot / Image
       <span class="badge">DROP or CLICK</span>
+      <span class="badge-blue">AUTO</span>
     </div>
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="placeholder">
         <div class="icon">🖼️</div>
         <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
         <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
+        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
       </div>
       <img id="preview-img" alt="Screenshot preview" />
     </div>
@@ -306,6 +340,37 @@
     }
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // 🔥 NEW: postMessage listener — Extension থেকে ছবি receive করে
+  // ═══════════════════════════════════════════════════════════════
+  window.addEventListener('message', function(event) {
+    // Security: only accept MW_OCR_IMAGE messages
+    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
+
+    const base64 = event.data.base64;
+    if (!base64) return;
+
+    console.log('[MW Extractor] Extension থেকে ছবি পেয়েছি, auto extracting...');
+
+    // Show banner
+    const banner = document.getElementById('auto-banner');
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
+
+    // Load image into preview
+    const dataUrl = 'data:image/png;base64,' + base64;
+    previewImg.src = dataUrl;
+    dropZone.classList.add('has-image');
+    currentImageBase64 = base64;
+    document.getElementById('extract-btn').disabled = false;
+    setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+
+    // Auto-trigger extraction after short delay
+    setTimeout(() => {
+      extractDates();
+    }, 800);
+  });
+
   function loadImage(file) {
     const reader = new FileReader();
     reader.onload = ev => {
@@ -335,7 +400,6 @@
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      // ✅ সঠিক model name: meta-llama/llama-4-scout-17b-16e-instruct
       const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
