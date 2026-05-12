@@ -442,20 +442,26 @@
     area.innerHTML = '';
 
     try {
-      const GEMINI_KEY = 'AIzaSyALr77s3EMg5JV4ZoVC858cg3RTw_9i4jo';
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+      const OR_KEY = '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';
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OR_KEY}`,
+          'HTTP-Referer': 'https://alifmondol2030-lgtm.github.io',
+          'X-Title': 'MW Date Extractor'
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [
+          model: 'google/gemini-2.0-flash-exp:free',
+          messages: [{
+            role: 'user',
+            content: [
               {
-                inline_data: {
-                  mime_type: 'image/png',
-                  data: currentImageBase64
-                }
+                type: 'image_url',
+                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
               },
               {
+                type: 'text',
                 text: `Look at this image carefully. Find ALL dates in the "Datum" column (date column). 
 Extract every date you see. Dates are in format DD.MM.YY or DD.MM.26 etc.
 
@@ -476,10 +482,8 @@ List every date in order. No explanation, just JSON.`
       });
 
       const data = await response.json();
-
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-      const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+      const text = data.choices?.[0]?.message?.content || '';
       // Parse JSON
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
