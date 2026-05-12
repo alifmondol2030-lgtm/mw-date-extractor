@@ -375,44 +375,26 @@
     setTimeout(() => banner.classList.remove('show'), 5000);
   }
 
-  // ── SessionStorage check (same-tab navigate এর পর) ──
-  (function checkSessionStorage() {
+  // ── Extension Content Script থেকে image receive (v1.5 — chrome.storage.local পদ্ধতি) ──
+  // extractor_content.js custom event dispatch করে, এখানে সেটা ধরি
+  window.addEventListener('mw_ocr_image_ready', function(event) {
     try {
-      const base64 = sessionStorage.getItem('mw_ocr_pending');
-      const mime   = sessionStorage.getItem('mw_ocr_mime') || 'image/png';
-      const ts     = sessionStorage.getItem('mw_ocr_ts');
-
+      const { base64, mime } = event.detail;
       if (!base64) return;
 
-      // পুরোনো timestamp হলে ignore (৬০ সেকেন্ডের বেশি পুরোনো)
-      if (ts && (Date.now() - parseInt(ts)) > 60000) {
-        console.log('[MW Extractor] SessionStorage image too old, ignoring');
-        sessionStorage.removeItem('mw_ocr_pending');
-        sessionStorage.removeItem('mw_ocr_mime');
-        sessionStorage.removeItem('mw_ocr_ts');
-        return;
-      }
+      console.log('[MW Extractor] Extension থেকে image পেয়েছি via custom event!');
 
-      console.log('[MW Extractor] SessionStorage থেকে নতুন screenshot পেয়েছি!');
-
-      // Use করার পর clear করো (পরের বার যেন পুরোনোটা না দেখায়)
-      sessionStorage.removeItem('mw_ocr_pending');
-      sessionStorage.removeItem('mw_ocr_mime');
-      sessionStorage.removeItem('mw_ocr_ts');
-
-      const loaded = loadImageFromBase64(base64, mime);
+      const loaded = loadImageFromBase64(base64, mime || 'image/png');
       if (!loaded) return;
 
-      showAutoBanner('⚡ নতুন Screenshot পেয়েছি — Auto Extracting...');
+      showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
       setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
 
-      // Auto extract
       setTimeout(() => { extractDates(); }, 800);
-
     } catch(e) {
-      console.warn('[MW Extractor] SessionStorage read error:', e);
+      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
     }
-  })();
+  });
 
   // ── postMessage fallback (পুরোনো window.open পদ্ধতির জন্য) ──
   window.addEventListener('message', function(event) {
