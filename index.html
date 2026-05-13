@@ -703,7 +703,9 @@ Return ONLY valid JSON, no markdown, no explanation:
       ['9','2'],['9','3'],['9','0'],
       ['6','0'],['6','4'],['6','5'],
       ['8','3'],['8','0'],
-      ['7','1'],['7','0'],  // ← 7→0 যোগ করা হয়েছে (e.g. 27→20)
+      ['7','1'],['7','0'],
+      ['1','5'],['1','4'],  // ← 1→5, 1→4 (e.g. 11→15, 11→14)
+      ['5','4'],['4','5'],  // ← month fix (e.g. 05→04)
       ['2','9'],['5','6'],['1','7']
     ];
 
@@ -718,6 +720,31 @@ Return ONLY valid JSON, no markdown, no explanation:
           const newVal = mon*100 + newDay;
           if (newVal >= prev && newVal <= nextVal) {
             return {...d, day: String(newDay), month: String(mon), raw: newDay+'.'+mon};
+          }
+        }
+      }
+      return null;
+    }
+
+    // দুটো digit একসাথে ভুল — day + month দুটোই fix চেষ্টা করো
+    function tryFixDayAndMonth(d, prev, nextVal) {
+      const dayStr = String(parseInt(d.day)).padStart(2,'0');
+      const monStr = String(parseInt(d.month)).padStart(2,'0');
+      for (const [dw, dr] of digitFixes) {
+        for (let dp = 0; dp < dayStr.length; dp++) {
+          if (dayStr[dp] !== dw) continue;
+          const newDay = parseInt(dayStr.slice(0,dp) + dr + dayStr.slice(dp+1));
+          if (newDay < 1 || newDay > 31) continue;
+          for (const [mw, mr] of digitFixes) {
+            for (let mp = 0; mp < monStr.length; mp++) {
+              if (monStr[mp] !== mw) continue;
+              const newMon = parseInt(monStr.slice(0,mp) + mr + monStr.slice(mp+1));
+              if (newMon < 1 || newMon > 12) continue;
+              const newVal = newMon*100 + newDay;
+              if (newVal >= prev && newVal <= nextVal) {
+                return {...d, day: String(newDay), month: String(newMon), raw: newDay+'.'+newMon};
+              }
+            }
           }
         }
       }
@@ -767,7 +794,8 @@ Return ONLY valid JSON, no markdown, no explanation:
 
         if (!fixed) {
           fixed = tryFixDay(result[i], prev, nextVal)
-               || tryFixMonth(result[i], prev, nextVal);
+               || tryFixMonth(result[i], prev, nextVal)
+               || tryFixDayAndMonth(result[i], prev, nextVal); // double misread
         }
 
         if (fixed) {
