@@ -650,9 +650,10 @@ Return ONLY valid JSON, no markdown, no explanation:
 
       // renderDates এর ভেতরে filterAscending হয় এবং extractedDates = validOnly হয়
       renderDates(parsed.year, parsed.dates || []);
-      setStatus('done', `✓ ${extractedDates.length}টি তারিখ পাওয়া গেছে`);
+      const validCount = extractedDates.filter(d => !d.blank).length;
+      setStatus('done', `✓ ${validCount}টি তারিখ পাওয়া গেছে`);
       document.getElementById('copy-btn').disabled = false;
-      document.getElementById('count-display').textContent = `${extractedDates.length} dates found`;
+      document.getElementById('count-display').textContent = `${validCount} dates found`;
 
       // ── renderDates এর পরে save — এখন extractedDates = validOnly (skipped বাদ) ──
       try {
@@ -698,19 +699,21 @@ Return ONLY valid JSON, no markdown, no explanation:
       ['9','2'],['9','3'],['9','0'],
       ['6','0'],['6','4'],['6','5'],
       ['8','3'],['8','0'],
-      ['7','1'],['2','9'],['5','6']
+      ['7','1'],['7','0'],  // ← 7→0 যোগ করা হয়েছে (e.g. 27→20)
+      ['2','9'],['5','6'],['1','7']
     ];
 
-    function tryFixDay(d, prev, nextVal) {
+    function tryFixDay(d, prev, nextVal, forceMon) {
       const dayStr = String(parseInt(d.day)).padStart(2,'0');
+      const mon = forceMon !== undefined ? forceMon : parseInt(d.month);
       for (const [wrong, right] of digitFixes) {
         for (let pos = 0; pos < dayStr.length; pos++) {
           if (dayStr[pos] !== wrong) continue;
           const newDay = parseInt(dayStr.slice(0,pos) + right + dayStr.slice(pos+1));
           if (newDay < 1 || newDay > 31) continue;
-          const newVal = parseInt(d.month)*100 + newDay;
+          const newVal = mon*100 + newDay;
           if (newVal >= prev && newVal <= nextVal) {
-            return {...d, day: String(newDay), raw: newDay+'.'+d.month};
+            return {...d, day: String(newDay), month: String(mon), raw: newDay+'.'+mon};
           }
         }
       }
@@ -746,8 +749,23 @@ Return ONLY valid JSON, no markdown, no explanation:
         // Fix if out of order: too small vs prev OR too big vs next
         if (curr >= prev && curr <= nextVal) continue;
 
-        const fixed = tryFixDay(result[i], prev, nextVal)
-                   || tryFixMonth(result[i], prev, nextVal);
+        // ── Same-month sandwiching ──
+        // যদি prev ও next same month হয়, current date-এর month সেটাই হওয়া উচিত
+        let fixed = null;
+        if (i > 0 && i+1 < result.length) {
+          const prevMon  = parseInt(result[i-1].month);
+          const nextMon  = parseInt(result[i+1].month);
+          if (prevMon === nextMon) {
+            // Forced month দিয়ে day fix চেষ্টা
+            fixed = tryFixDay(result[i], prev, nextVal, prevMon);
+          }
+        }
+
+        if (!fixed) {
+          fixed = tryFixDay(result[i], prev, nextVal)
+               || tryFixMonth(result[i], prev, nextVal);
+        }
+
         if (fixed) {
           console.log('[AutoCorrect]', result[i].day+'.'+result[i].month, '→', fixed.day+'.'+fixed.month);
           result[i] = fixed;
@@ -763,14 +781,34 @@ Return ONLY valid JSON, no markdown, no explanation:
     const valid = [];
     const skipped = [];
     let lastVal = -1;
-    dates.forEach(d => {
+    let yearOffset = 0; // year-wrap detect করার জন্য
+
+    dates.forEach((d, i) => {
       const val = toDateInt(d);
-      if (val > 0 && val >= lastVal) {
-        valid.push({ ...d, skipped: false });
-        lastVal = val;
-      } else {
-        skipped.push(d);
+      if (val <= 0) {
         valid.push({ ...d, skipped: true });
+        skipped.push(d);
+        return;
+      }
+
+      const adjustedVal = val + yearOffset * 1200; // 12 months offset
+
+      if (adjustedVal >= lastVal) {
+        valid.push({ ...d, skipped: false });
+        lastVal = adjustedVal;
+      } else {
+        // Year-wrap check: যদি new val + 1200 (১ বছর) দিলে ascending হয়
+        const wrappedVal = val + (yearOffset + 1) * 1200;
+        if (wrappedVal >= lastVal) {
+          // Year boundary cross হয়েছে — valid হিসেবে রাখো
+          yearOffset++;
+          valid.push({ ...d, skipped: false });
+          lastVal = wrappedVal;
+          console.log('[YearWrap] date', d.day+'.'+d.month, 'year boundary detected');
+        } else {
+          skipped.push(d);
+          valid.push({ ...d, skipped: true });
+        }
       }
     });
     return { valid, skipped };
@@ -815,13 +853,13 @@ Return ONLY valid JSON, no markdown, no explanation:
       area.appendChild(item);
     });
 
-    // extractedDates update — শুধু valid গুলো রাখো
-    extractedDates = validOnly;
+    // extractedDates update — position ঠিক রেখে সব রাখো (skipped = blank)
+    extractedDates = valid.map(d => d.skipped ? { blank: true, num: d.num } : d);
   }
 
   function copyAll() {
     if (!extractedDates.length) return;
-    const text = extractedDates.map(d => d.raw || `${d.day}.${d.month}`).join('\n');
+    const text = extractedDates.filter(d => !d.blank).map(d => d.raw || `${d.day}.${d.month}`).join('\n');
     navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
   }
 
