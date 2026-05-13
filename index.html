@@ -275,10 +275,17 @@
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
 
-    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GROQ KEY:</span>
-      <input id="api-key-input" type="password" placeholder="gsk_..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
-      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="color:#00ff88;font-size:0.7rem;font-family:monospace;font-weight:700;">🔑 GROQ KEYS (Auto-Rotate)</span>
+        <span id="active-key-indicator" style="font-size:0.65rem;font-family:monospace;color:#555570;margin-left:auto;"></span>
+      </div>
+      <div id="keys-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button onclick="addKeyRow()" style="background:#1e1e2e;color:#00ff88;font-family:monospace;font-size:0.68rem;font-weight:700;padding:5px 10px;border:1px solid #00ff88;border-radius:4px;cursor:pointer;">+ KEY</button>
+        <button onclick="saveAllKeys()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.68rem;font-weight:700;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE ALL</button>
+        <button onclick="clearAllKeys()" style="background:#1e1e2e;color:#ff4466;font-family:monospace;font-size:0.68rem;padding:5px 10px;border:1px solid #ff4466;border-radius:4px;cursor:pointer;">CLEAR</button>
+      </div>
     </div>
 
     <div id="action-bar">
@@ -312,13 +319,97 @@
   let currentImageBase64 = null;
   let extractedDates = [];
 
-  const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('groq_key') || '';
+  // ── Multi-Key Rotation ──
+  let groqKeys = [];
+  let currentKeyIndex = 0;
 
-  function saveKey() {
-    localStorage.setItem('groq_key', inp.value.trim());
-    showToast('Key saved!');
+  function loadKeysFromStorage() {
+    try {
+      const saved = localStorage.getItem('groq_keys_v2');
+      if (saved) {
+        groqKeys = JSON.parse(saved);
+      } else {
+        const old = localStorage.getItem('groq_key') || '';
+        groqKeys = old ? [{ key: old }] : [];
+      }
+    } catch(e) { groqKeys = []; }
   }
+
+  function saveAllKeys() {
+    const rows = document.querySelectorAll('.key-row-input');
+    groqKeys = [];
+    rows.forEach(function(inp2, i) {
+      const v = inp2.value.trim();
+      if (v) groqKeys.push({ key: v });
+    });
+    localStorage.setItem('groq_keys_v2', JSON.stringify(groqKeys));
+    currentKeyIndex = 0;
+    updateKeyIndicator();
+    showToast('✓ ' + groqKeys.length + ' key সেভ!');
+  }
+
+  function clearAllKeys() {
+    groqKeys = [];
+    localStorage.removeItem('groq_keys_v2');
+    renderKeysList();
+    updateKeyIndicator();
+    showToast('Keys cleared');
+  }
+
+  function addKeyRow(value) {
+    value = value || '';
+    const list = document.getElementById('keys-list');
+    const idx = list.children.length + 1;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:4px;align-items:center;';
+    const safeVal = value.replace(/"/g, '');
+    row.innerHTML = '<span style="color:#555570;font-size:0.65rem;font-family:monospace;min-width:32px;">K' + idx + ':</span>' +
+      '<input type="password" class="key-row-input" placeholder="gsk_..." value="' + safeVal + '" ' +
+      'style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.7rem;padding:5px 8px;border-radius:4px;outline:none;" />' +
+      '<button onclick="this.parentElement.remove();renumberRows();" style="background:transparent;border:none;color:#ff4466;cursor:pointer;font-size:0.9rem;padding:0 4px;">✕</button>';
+    list.appendChild(row);
+  }
+
+  function renumberRows() {
+    document.querySelectorAll('#keys-list span').forEach(function(s, i) {
+      s.textContent = 'K' + (i + 1) + ':';
+    });
+  }
+
+  function renderKeysList() {
+    const list = document.getElementById('keys-list');
+    list.innerHTML = '';
+    if (groqKeys.length === 0) { addKeyRow(); return; }
+    groqKeys.forEach(function(k) { addKeyRow(k.key); });
+  }
+
+  function updateKeyIndicator() {
+    const el = document.getElementById('active-key-indicator');
+    if (!el) return;
+    if (groqKeys.length === 0) {
+      el.textContent = '⚠ Key নেই';
+      el.style.color = '#ff4466';
+    } else {
+      el.textContent = 'K' + (currentKeyIndex + 1) + ' active / ' + groqKeys.length + ' keys';
+      el.style.color = '#00ff88';
+    }
+  }
+
+  function getActiveKey() {
+    if (!groqKeys.length) return null;
+    return groqKeys[currentKeyIndex] ? groqKeys[currentKeyIndex].key : null;
+  }
+
+  function rotateKey() {
+    if (groqKeys.length <= 1) return false;
+    currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
+    updateKeyIndicator();
+    return true;
+  }
+
+  loadKeysFromStorage();
+  renderKeysList();
+  updateKeyIndicator();
 
   // ── Page Load: last result restore করো ──
   (function restoreLastResult() {
@@ -469,10 +560,61 @@
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const KEY = localStorage.getItem('groq_key') || '';
-    if (!KEY) {
-      setStatus('error', '✗ Groq API Key নেই — উপরে GROQ KEY বক্সে দিন');
+    if (groqKeys.length === 0) {
+      setStatus('error', '✗ Key নেই — উপরে GROQ KEYS-এ দিন ও SAVE ALL করুন');
       return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = groqKeys.length;
+    let resp_outer, data_outer;
+
+    async function tryFetch() {
+      while (attempts < maxAttempts) {
+        const KEY = getActiveKey();
+        if (!KEY) break;
+        setStatus('running', '⟳ K' + (currentKeyIndex + 1) + ' দিয়ে চেষ্টা... (' + (attempts+1) + '/' + maxAttempts + ')');
+        const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + KEY
+          },
+          body: JSON.stringify({
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            messages: [{
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: { url: 'data:image/png;base64,' + currentImageBase64 }
+                },
+                {
+                  type: 'text',
+                  text: 'Look at this image. Find ALL dates in the Datum column. Dates are handwritten in format DD.MM.YY or DD.MM.26. Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]}'
+                }
+              ]
+            }],
+            temperature: 0,
+            max_tokens: 1000
+          })
+        });
+        const data = await resp.json();
+        if (resp.status === 429 || (data.error && data.error.message && data.error.message.toLowerCase().includes('rate limit'))) {
+          attempts++;
+          if (attempts < maxAttempts) {
+            rotateKey();
+            setStatus('running', '⚠ Rate limit! K' + (currentKeyIndex+1) + '-এ যাচ্ছি...');
+            await new Promise(r => setTimeout(r, 2000));
+            continue;
+          } else {
+            throw new Error('সব ' + groqKeys.length + 'টি key-এ rate limit! পরে চেষ্টা করুন।');
+          }
+        }
+        if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+        resp_outer = resp; data_outer = data;
+        return;
+      }
     }
 
     setStatus('running', 'Groq AI-তে পাঠানো হচ্ছে...');
@@ -482,34 +624,8 @@
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${KEY}`
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-          messages: [{
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
-              },
-              {
-                type: 'text',
-                text: 'Look at this image. Find ALL dates in the Datum column. Dates are handwritten in format DD.MM.YY or DD.MM.26. Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]}'
-              }
-            ]
-          }],
-          temperature: 0,
-          max_tokens: 1000
-        })
-      });
-
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      await tryFetch();
+      const data = data_outer;
 
       const rawText = data.choices?.[0]?.message?.content || '';
       const clean = rawText.replace(/```json|```/g, '').trim();
