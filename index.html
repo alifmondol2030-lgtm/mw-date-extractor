@@ -245,7 +245,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v1.6 — Groq (Llama 4 Scout) · Auto-OCR · Last Result Restored</span>
+  <span>v1.7 — Groq (Llama 4 Scout) · Auto-OCR · First-Date Fix</span>
 </header>
 
 <!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
@@ -695,6 +695,102 @@ Return ONLY valid JSON, no markdown, no explanation:
     return m * 100 + day;
   }
 
+  // ── Fix first date using next dates as reference ──
+  // যদি first date পরের dates এর চেয়ে বড় হয়, তাহলে digit fix চেষ্টা করো
+  function autoCorrectFirstDate(dates) {
+    if (!dates || dates.length < 2) return dates;
+
+    const result = dates.map(d => ({...d}));
+
+    // পরের ২-৩টা valid date দেখো
+    const nextSamples = [];
+    for (let i = 1; i < Math.min(4, result.length); i++) {
+      const v = toDateInt(result[i]);
+      if (v > 0) nextSamples.push(v);
+    }
+    if (nextSamples.length === 0) return result;
+
+    // পরের dates গুলো ascending কিনা দেখো — যদি অন্তত ২টা ascending হয়, ভালো reference
+    const nextMin = Math.min(...nextSamples);
+    const firstVal = toDateInt(result[0]);
+
+    // যদি first date পরের minimum এর চেয়ে বড় → first date ভুল
+    if (firstVal <= nextMin) return result; // ঠিকই আছে
+
+    console.log('[FirstDateFix] First date', result[0].day+'.'+result[0].month,
+      'is BIGGER than next dates min', nextMin, '— attempting fix');
+
+    const digitFixes = [
+      ['9','2'],['9','3'],['9','0'],
+      ['6','0'],['6','4'],['6','5'],
+      ['8','3'],['8','0'],
+      ['7','1'],['7','0'],
+      ['1','5'],['1','4'],
+      ['5','4'],['4','5'],
+      ['2','9'],['5','6'],['1','7'],
+      ['0','1'],['3','8'],['4','1'],
+    ];
+
+    const d = result[0];
+    const dayStr = String(parseInt(d.day)).padStart(2,'0');
+    const monStr = String(parseInt(d.month)).padStart(2,'0');
+
+    // Day fix চেষ্টা — fixed val পরের minimum এর চেয়ে ছোট বা সমান হতে হবে
+    for (const [wrong, right] of digitFixes) {
+      for (let pos = 0; pos < dayStr.length; pos++) {
+        if (dayStr[pos] !== wrong) continue;
+        const newDay = parseInt(dayStr.slice(0,pos) + right + dayStr.slice(pos+1));
+        if (newDay < 1 || newDay > 31) continue;
+        const newVal = parseInt(d.month) * 100 + newDay;
+        if (newVal <= nextMin) {
+          console.log('[FirstDateFix] Day fix:', d.day+'.'+d.month, '→', newDay+'.'+d.month);
+          result[0] = {...d, day: String(newDay), raw: newDay+'.'+d.month};
+          return result;
+        }
+      }
+    }
+
+    // Month fix চেষ্টা
+    for (const [wrong, right] of digitFixes) {
+      for (let pos = 0; pos < monStr.length; pos++) {
+        if (monStr[pos] !== wrong) continue;
+        const newMon = parseInt(monStr.slice(0,pos) + right + monStr.slice(pos+1));
+        if (newMon < 1 || newMon > 12) continue;
+        const newVal = newMon * 100 + parseInt(d.day);
+        if (newVal <= nextMin) {
+          console.log('[FirstDateFix] Month fix:', d.day+'.'+d.month, '→', d.day+'.'+newMon);
+          result[0] = {...d, month: String(newMon), raw: d.day+'.'+newMon};
+          return result;
+        }
+      }
+    }
+
+    // Day + Month দুটোই fix চেষ্টা
+    for (const [dw, dr] of digitFixes) {
+      for (let dp = 0; dp < dayStr.length; dp++) {
+        if (dayStr[dp] !== dw) continue;
+        const newDay = parseInt(dayStr.slice(0,dp) + dr + dayStr.slice(dp+1));
+        if (newDay < 1 || newDay > 31) continue;
+        for (const [mw, mr] of digitFixes) {
+          for (let mp = 0; mp < monStr.length; mp++) {
+            if (monStr[mp] !== mw) continue;
+            const newMon = parseInt(monStr.slice(0,mp) + mr + monStr.slice(mp+1));
+            if (newMon < 1 || newMon > 12) continue;
+            const newVal = newMon * 100 + newDay;
+            if (newVal <= nextMin) {
+              console.log('[FirstDateFix] Day+Month fix:', d.day+'.'+d.month, '→', newDay+'.'+newMon);
+              result[0] = {...d, day: String(newDay), month: String(newMon), raw: newDay+'.'+newMon};
+              return result;
+            }
+          }
+        }
+      }
+    }
+
+    console.log('[FirstDateFix] Could not auto-fix first date');
+    return result;
+  }
+
   // ── Auto-correct misread digits to restore ascending order ──
   function autoCorrectDates(dates) {
     if (!dates || dates.length < 2) return dates;
@@ -871,7 +967,11 @@ Return ONLY valid JSON, no markdown, no explanation:
       return;
     }
 
-    dates = autoCorrectDates(dates); // digit misread fix
+    dates = autoCorrectFirstDate(dates); // প্রথম date fix (পরের dates দেখে)
+    const origFirst = dates[0] ? dates[0].day+'.'+dates[0].month : null;
+    dates = autoCorrectDates(dates); // বাকি digit misread fix
+    const fixedFirst = dates[0] ? dates[0].day+'.'+dates[0].month : null;
+    const firstWasFixed = origFirst && fixedFirst && origFirst !== fixedFirst;
     const { valid, skipped } = filterAscending(dates);
     const validOnly = valid.filter(d => !d.skipped);
     const skippedCount = valid.filter(d => d.skipped).length;
@@ -879,6 +979,13 @@ Return ONLY valid JSON, no markdown, no explanation:
     const label = document.createElement('div');
     label.className = 'section-label';
     label.textContent = `Year: ${year || '—'} — ${validOnly.length} entries` + (skippedCount ? ` (${skippedCount}টি বাদ দেওয়া হয়েছে ↓)` : '');
+    if (firstWasFixed) {
+      const badge = document.createElement('span');
+      badge.style.cssText = 'margin-left:8px;background:#ff9900;color:#000;font-size:0.6rem;padding:2px 6px;border-radius:3px;font-weight:700;';
+      badge.textContent = '⚠ 1st date auto-fixed';
+      badge.title = 'প্রথম date টা OCR ভুল ছিল — পরের dates দেখে auto-correct করা হয়েছে';
+      label.appendChild(badge);
+    }
     area.appendChild(label);
 
     const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
