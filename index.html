@@ -667,6 +667,30 @@
     document.getElementById('extract-btn').disabled = false;
   }
 
+  function toDateInt(d) {
+    // month * 100 + day → compare করার জন্য (year নেই)
+    const m = parseInt(d.month) || 0;
+    const day = parseInt(d.day) || 0;
+    return m * 100 + day;
+  }
+
+  function filterAscending(dates) {
+    const valid = [];
+    const skipped = [];
+    let lastVal = -1;
+    dates.forEach(d => {
+      const val = toDateInt(d);
+      if (val > 0 && val >= lastVal) {
+        valid.push({ ...d, skipped: false });
+        lastVal = val;
+      } else {
+        skipped.push(d);
+        valid.push({ ...d, skipped: true });
+      }
+    });
+    return { valid, skipped };
+  }
+
   function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
@@ -676,25 +700,37 @@
       return;
     }
 
+    const { valid, skipped } = filterAscending(dates);
+    const validOnly = valid.filter(d => !d.skipped);
+    const skippedCount = valid.filter(d => d.skipped).length;
+
     const label = document.createElement('div');
     label.className = 'section-label';
-    label.textContent = `Year: ${year || '—'} — ${dates.length} entries`;
+    label.textContent = `Year: ${year || '—'} — ${validOnly.length} entries` + (skippedCount ? ` (${skippedCount}টি বাদ দেওয়া হয়েছে ↓)` : '');
     area.appendChild(label);
 
     const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    dates.forEach((d, i) => {
+    valid.forEach((d, i) => {
       const item = document.createElement('div');
       item.className = 'date-item';
       item.style.animationDelay = `${i * 0.04}s`;
       const mName = monthNames[parseInt(d.month)] || d.month;
+      if (d.skipped) {
+        // বাদ দেওয়া date — ধূসর + strikethrough
+        item.style.cssText = 'opacity:0.35;text-decoration:line-through;filter:grayscale(1);';
+        item.title = '⚠ Descending date — বাদ দেওয়া হয়েছে';
+      }
       item.innerHTML = `
         <div class="date-num">${d.num}</div>
-        <div class="date-value">${d.day}.${d.month}</div>
-        <div class="date-full">${d.day} ${mName}</div>
+        <div class="date-value">${d.day}.${d.month}${d.skipped ? ' ✕' : ''}</div>
+        <div class="date-full">${d.skipped ? '⚠ skipped' : d.day + ' ' + mName}</div>
       `;
       area.appendChild(item);
     });
+
+    // extractedDates update — শুধু valid গুলো রাখো
+    extractedDates = validOnly;
   }
 
   function copyAll() {
