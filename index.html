@@ -631,13 +631,13 @@
       const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
-      extractedDates = parsed.dates || [];
-      renderDates(parsed.year, extractedDates);
+      // renderDates এর ভেতরে filterAscending হয় এবং extractedDates = validOnly হয়
+      renderDates(parsed.year, parsed.dates || []);
       setStatus('done', `✓ ${extractedDates.length}টি তারিখ পাওয়া গেছে`);
       document.getElementById('copy-btn').disabled = false;
       document.getElementById('count-display').textContent = `${extractedDates.length} dates found`;
 
-      // ── Result localStorage এ save করো (fallback) ──
+      // ── renderDates এর পরে save — এখন extractedDates = validOnly (skipped বাদ) ──
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
