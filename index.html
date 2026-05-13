@@ -727,9 +727,9 @@ Return ONLY valid JSON, no markdown, no explanation:
     }
 
     // দুটো digit একসাথে ভুল — day + month দুটোই fix চেষ্টা করো
-    function tryFixDayAndMonth(d, prev, nextVal) {
+    function tryFixDayAndMonth(d, prev, nextVal, forceMon) {
       const dayStr = String(parseInt(d.day)).padStart(2,'0');
-      const monStr = String(parseInt(d.month)).padStart(2,'0');
+      const monStr = forceMon ? String(forceMon).padStart(2,'0') : String(parseInt(d.month)).padStart(2,'0');
       for (const [dw, dr] of digitFixes) {
         for (let dp = 0; dp < dayStr.length; dp++) {
           if (dayStr[dp] !== dw) continue;
@@ -788,7 +788,23 @@ Return ONLY valid JSON, no markdown, no explanation:
           const nextMon  = parseInt(result[i+1].month);
           if (prevMon === nextMon) {
             // Forced month দিয়ে day fix চেষ্টা
-            fixed = tryFixDay(result[i], prev, nextVal, prevMon);
+            fixed = tryFixDay(result[i], prev, nextVal, prevMon)
+                 || tryFixDayAndMonth(result[i], prev, nextVal, prevMon);
+
+            // digitFix দিয়ে না হলে — prev ও next এর মাঝামাঝি যেকোনো valid day দাও
+            if (!fixed) {
+              const prevDay = parseInt(result[i-1].day);
+              const nextDay = parseInt(result[i+1].day);
+              if (nextDay > prevDay + 1) {
+                // মাঝে gap আছে — মাঝামাঝি day নাও
+                const midDay = prevDay + 1;
+                const midVal = prevMon * 100 + midDay;
+                if (midVal >= prev && midVal <= nextVal) {
+                  fixed = {...result[i], day: String(midDay), month: String(prevMon), raw: midDay+'.'+prevMon};
+                  console.log('[SandwichFill]', result[i].day+'.'+result[i].month, '→', midDay+'.'+prevMon);
+                }
+              }
+            }
           }
         }
 
