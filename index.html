@@ -595,11 +595,17 @@
 
 IMPORTANT RULES:
 1. Dates are handwritten in German format: DD.MM.YY or DD.MM.26
-2. Dates MUST be in ascending order (each date must be >= previous date)
-3. If a date seems to break the ascending order, you likely misread it - look again carefully
-4. Common misreads: 4 vs 6, 1 vs 7, 3 vs 8, 0 vs 6 - double check these digits
-5. Example: if you see 25.03, 01.04, then next looks like 08.06 but breaks order → it is probably 08.04 not 08.06
-6. Return ALL rows that have dates, empty rows skip
+2. Dates MUST be in STRICTLY ASCENDING order - each date must be greater than or equal to the previous
+3. If a date breaks ascending order, you MISREAD it - look again very carefully at each digit
+4. Common digit misreads in handwriting:
+   - 2 looks like 9 (most common!) → e.g. "20" misread as "29"
+   - 4 looks like 6 → e.g. "04" misread as "06"
+   - 1 looks like 7
+   - 3 looks like 8
+   - 0 looks like 6
+5. Self-check: after reading all dates, verify each is >= previous. If not, re-examine that digit.
+6. Example: sequence 18.03 → next looks like "29.03" but 29>18 so could be right OR it could be "20.03" misread - check carefully
+7. Return ALL rows that have dates, skip truly empty rows
 
 Return ONLY valid JSON, no markdown, no explanation:
 {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]}`
