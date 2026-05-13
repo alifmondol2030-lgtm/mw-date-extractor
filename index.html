@@ -245,7 +245,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v1.7 — Groq (Llama 4 Scout) · Auto-OCR · First-Date Fix</span>
+  <span>v1.6 — Groq (Llama 4 Scout) · Auto-OCR · Last Result Restored</span>
 </header>
 
 <!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
@@ -275,17 +275,10 @@
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
 
-    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-        <span style="color:#00ff88;font-size:0.7rem;font-family:monospace;font-weight:700;">🔑 GROQ KEYS (Auto-Rotate)</span>
-        <span id="active-key-indicator" style="font-size:0.65rem;font-family:monospace;color:#555570;margin-left:auto;"></span>
-      </div>
-      <div id="keys-list" style="display:flex;flex-direction:column;gap:4px;"></div>
-      <div style="display:flex;gap:6px;margin-top:6px;">
-        <button onclick="addKeyRow()" style="background:#1e1e2e;color:#00ff88;font-family:monospace;font-size:0.68rem;font-weight:700;padding:5px 10px;border:1px solid #00ff88;border-radius:4px;cursor:pointer;">+ KEY</button>
-        <button onclick="saveAllKeys()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.68rem;font-weight:700;padding:5px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE ALL</button>
-        <button onclick="clearAllKeys()" style="background:#1e1e2e;color:#ff4466;font-family:monospace;font-size:0.68rem;padding:5px 10px;border:1px solid #ff4466;border-radius:4px;cursor:pointer;">CLEAR</button>
-      </div>
+    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GROQ KEY:</span>
+      <input id="api-key-input" type="password" placeholder="gsk_..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
     </div>
 
     <div id="action-bar">
@@ -319,97 +312,13 @@
   let currentImageBase64 = null;
   let extractedDates = [];
 
-  // ── Multi-Key Rotation ──
-  let groqKeys = [];
-  let currentKeyIndex = 0;
+  const inp = document.getElementById('api-key-input');
+  inp.value = localStorage.getItem('groq_key') || '';
 
-  function loadKeysFromStorage() {
-    try {
-      const saved = localStorage.getItem('groq_keys_v2');
-      if (saved) {
-        groqKeys = JSON.parse(saved);
-      } else {
-        const old = localStorage.getItem('groq_key') || '';
-        groqKeys = old ? [{ key: old }] : [];
-      }
-    } catch(e) { groqKeys = []; }
+  function saveKey() {
+    localStorage.setItem('groq_key', inp.value.trim());
+    showToast('Key saved!');
   }
-
-  function saveAllKeys() {
-    const rows = document.querySelectorAll('.key-row-input');
-    groqKeys = [];
-    rows.forEach(function(inp2, i) {
-      const v = inp2.value.trim();
-      if (v) groqKeys.push({ key: v });
-    });
-    localStorage.setItem('groq_keys_v2', JSON.stringify(groqKeys));
-    currentKeyIndex = 0;
-    updateKeyIndicator();
-    showToast('✓ ' + groqKeys.length + ' key সেভ!');
-  }
-
-  function clearAllKeys() {
-    groqKeys = [];
-    localStorage.removeItem('groq_keys_v2');
-    renderKeysList();
-    updateKeyIndicator();
-    showToast('Keys cleared');
-  }
-
-  function addKeyRow(value) {
-    value = value || '';
-    const list = document.getElementById('keys-list');
-    const idx = list.children.length + 1;
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:4px;align-items:center;';
-    const safeVal = value.replace(/"/g, '');
-    row.innerHTML = '<span style="color:#555570;font-size:0.65rem;font-family:monospace;min-width:32px;">K' + idx + ':</span>' +
-      '<input type="password" class="key-row-input" placeholder="gsk_..." value="' + safeVal + '" ' +
-      'style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.7rem;padding:5px 8px;border-radius:4px;outline:none;" />' +
-      '<button onclick="this.parentElement.remove();renumberRows();" style="background:transparent;border:none;color:#ff4466;cursor:pointer;font-size:0.9rem;padding:0 4px;">✕</button>';
-    list.appendChild(row);
-  }
-
-  function renumberRows() {
-    document.querySelectorAll('#keys-list span').forEach(function(s, i) {
-      s.textContent = 'K' + (i + 1) + ':';
-    });
-  }
-
-  function renderKeysList() {
-    const list = document.getElementById('keys-list');
-    list.innerHTML = '';
-    if (groqKeys.length === 0) { addKeyRow(); return; }
-    groqKeys.forEach(function(k) { addKeyRow(k.key); });
-  }
-
-  function updateKeyIndicator() {
-    const el = document.getElementById('active-key-indicator');
-    if (!el) return;
-    if (groqKeys.length === 0) {
-      el.textContent = '⚠ Key নেই';
-      el.style.color = '#ff4466';
-    } else {
-      el.textContent = 'K' + (currentKeyIndex + 1) + ' active / ' + groqKeys.length + ' keys';
-      el.style.color = '#00ff88';
-    }
-  }
-
-  function getActiveKey() {
-    if (!groqKeys.length) return null;
-    return groqKeys[currentKeyIndex] ? groqKeys[currentKeyIndex].key : null;
-  }
-
-  function rotateKey() {
-    if (groqKeys.length <= 1) return false;
-    currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
-    updateKeyIndicator();
-    return true;
-  }
-
-  loadKeysFromStorage();
-  renderKeysList();
-  updateKeyIndicator();
 
   // ── Page Load: last result restore করো ──
   (function restoreLastResult() {
@@ -560,82 +469,10 @@
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    if (groqKeys.length === 0) {
-      setStatus('error', '✗ Key নেই — উপরে GROQ KEYS-এ দিন ও SAVE ALL করুন');
+    const KEY = localStorage.getItem('groq_key') || '';
+    if (!KEY) {
+      setStatus('error', '✗ Groq API Key নেই — উপরে GROQ KEY বক্সে দিন');
       return;
-    }
-
-    let attempts = 0;
-    const maxAttempts = groqKeys.length;
-    let resp_outer, data_outer;
-
-    async function tryFetch() {
-      while (attempts < maxAttempts) {
-        const KEY = getActiveKey();
-        if (!KEY) break;
-        setStatus('running', '⟳ K' + (currentKeyIndex + 1) + ' দিয়ে চেষ্টা... (' + (attempts+1) + '/' + maxAttempts + ')');
-        const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + KEY
-          },
-          body: JSON.stringify({
-            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-            messages: [{
-              role: 'user',
-              content: [
-                {
-                  type: 'image_url',
-                  image_url: { url: 'data:image/png;base64,' + currentImageBase64 }
-                },
-                {
-                  type: 'text',
-                  text: `Look at this image. Find ALL dates in the Datum column.
-
-IMPORTANT RULES:
-1. Dates may be written as DD.MM.YY, DD.MM.YYYY, or with GERMAN month names:
-   JAN=01, FEB=02, MRZ=03, APR=04, MAI=05, JUN=06,
-   JUL=07, AUG=08, SEP=09, OKT=10, NOV=11, DEZ=12
-   Convert month names to numbers: e.g. "15. APR. 2026" → day=15, month=04
-2. Read the DAY number very carefully — do NOT confuse with other columns.
-   The day is the FIRST number before the month.
-3. Common digit misreads in handwriting:
-   - 1 looks like 7 (critical! "15" misread as "75" or "11" as "71")
-   - 2 looks like 9 → e.g. "20" misread as "90"
-   - 4 looks like 6
-   - 3 looks like 8
-   - 0 looks like 6
-   - 5 looks like 6
-4. Dates may span MULTIPLE years (e.g. Oct 2025 followed by Apr 2026) — this is NORMAL, do not force ascending.
-5. Return ALL rows that have dates, skip truly empty rows.
-6. Double-check each day digit carefully before returning.
-
-Return ONLY valid JSON, no markdown, no explanation:
-{"year":"2026","dates":[{"num":1,"raw":"15.04.26","day":"15","month":"04"}]}`
-                }
-              ]
-            }],
-            temperature: 0,
-            max_tokens: 1000
-          })
-        });
-        const data = await resp.json();
-        if (resp.status === 429 || (data.error && data.error.message && data.error.message.toLowerCase().includes('rate limit'))) {
-          attempts++;
-          if (attempts < maxAttempts) {
-            rotateKey();
-            setStatus('running', '⚠ Rate limit! K' + (currentKeyIndex+1) + '-এ যাচ্ছি...');
-            await new Promise(r => setTimeout(r, 2000));
-            continue;
-          } else {
-            throw new Error('সব ' + groqKeys.length + 'টি key-এ rate limit! পরে চেষ্টা করুন।');
-          }
-        }
-        if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-        resp_outer = resp; data_outer = data;
-        return;
-      }
     }
 
     setStatus('running', 'Groq AI-তে পাঠানো হচ্ছে...');
@@ -645,21 +482,47 @@ Return ONLY valid JSON, no markdown, no explanation:
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      await tryFetch();
-      const data = data_outer;
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${KEY}`
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
+              },
+              {
+                type: 'text',
+                text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
+              }
+            ]
+          }],
+          temperature: 0,
+          max_tokens: 1000
+        })
+      });
+
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
       const rawText = data.choices?.[0]?.message?.content || '';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
-      // renderDates এর ভেতরে filterAscending হয় এবং extractedDates = validOnly হয়
-      renderDates(parsed.year, parsed.dates || []);
-      const validCount = extractedDates.filter(d => !d.blank).length;
-      setStatus('done', `✓ ${validCount}টি তারিখ পাওয়া গেছে`);
-      document.getElementById('copy-btn').disabled = false;
-      document.getElementById('count-display').textContent = `${validCount} dates found`;
+      extractedDates = parsed.dates || [];
+      const validDates = extractedDates.filter(d => !d.blank);
+      renderDates(parsed.year, extractedDates);
+      setStatus('done', `✓ ${validDates.length}টি তারিখ পাওয়া গেছে${extractedDates.length - validDates.length > 0 ? ` (${extractedDates.length - validDates.length}টি blank/skip)` : ''}`);
+      document.getElementById('copy-btn').disabled = validDates.length === 0;
+      document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-      // ── renderDates এর পরে save — এখন extractedDates = validOnly (skipped বাদ) ──
+      // ── Result localStorage এ save করো (fallback) ──
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
@@ -689,275 +552,6 @@ Return ONLY valid JSON, no markdown, no explanation:
     document.getElementById('extract-btn').disabled = false;
   }
 
-  function toDateInt(d) {
-    const m = parseInt(d.month) || 0;
-    const day = parseInt(d.day) || 0;
-    return m * 100 + day;
-  }
-
-  // ── Fix first date using next dates as reference ──
-  // যদি first date পরের dates এর চেয়ে বড় হয়, তাহলে digit fix চেষ্টা করো
-  function autoCorrectFirstDate(dates) {
-    if (!dates || dates.length < 2) return dates;
-
-    const result = dates.map(d => ({...d}));
-
-    // পরের ২-৩টা valid date দেখো
-    const nextSamples = [];
-    for (let i = 1; i < Math.min(4, result.length); i++) {
-      const v = toDateInt(result[i]);
-      if (v > 0) nextSamples.push(v);
-    }
-    if (nextSamples.length === 0) return result;
-
-    // পরের dates গুলো ascending কিনা দেখো — যদি অন্তত ২টা ascending হয়, ভালো reference
-    const nextMin = Math.min(...nextSamples);
-    const firstVal = toDateInt(result[0]);
-
-    // যদি first date পরের minimum এর চেয়ে বড় → first date ভুল
-    if (firstVal <= nextMin) return result; // ঠিকই আছে
-
-    console.log('[FirstDateFix] First date', result[0].day+'.'+result[0].month,
-      'is BIGGER than next dates min', nextMin, '— attempting fix');
-
-    const digitFixes = [
-      ['9','2'],['9','3'],['9','0'],
-      ['6','0'],['6','4'],['6','5'],
-      ['8','3'],['8','0'],
-      ['7','1'],['7','0'],
-      ['1','5'],['1','4'],
-      ['5','4'],['4','5'],
-      ['2','9'],['5','6'],['1','7'],
-      ['0','1'],['3','8'],['4','1'],
-    ];
-
-    const d = result[0];
-    const dayStr = String(parseInt(d.day)).padStart(2,'0');
-    const monStr = String(parseInt(d.month)).padStart(2,'0');
-
-    // Day fix চেষ্টা — fixed val পরের minimum এর চেয়ে ছোট বা সমান হতে হবে
-    for (const [wrong, right] of digitFixes) {
-      for (let pos = 0; pos < dayStr.length; pos++) {
-        if (dayStr[pos] !== wrong) continue;
-        const newDay = parseInt(dayStr.slice(0,pos) + right + dayStr.slice(pos+1));
-        if (newDay < 1 || newDay > 31) continue;
-        const newVal = parseInt(d.month) * 100 + newDay;
-        if (newVal <= nextMin) {
-          console.log('[FirstDateFix] Day fix:', d.day+'.'+d.month, '→', newDay+'.'+d.month);
-          result[0] = {...d, day: String(newDay), raw: newDay+'.'+d.month};
-          return result;
-        }
-      }
-    }
-
-    // Month fix চেষ্টা
-    for (const [wrong, right] of digitFixes) {
-      for (let pos = 0; pos < monStr.length; pos++) {
-        if (monStr[pos] !== wrong) continue;
-        const newMon = parseInt(monStr.slice(0,pos) + right + monStr.slice(pos+1));
-        if (newMon < 1 || newMon > 12) continue;
-        const newVal = newMon * 100 + parseInt(d.day);
-        if (newVal <= nextMin) {
-          console.log('[FirstDateFix] Month fix:', d.day+'.'+d.month, '→', d.day+'.'+newMon);
-          result[0] = {...d, month: String(newMon), raw: d.day+'.'+newMon};
-          return result;
-        }
-      }
-    }
-
-    // Day + Month দুটোই fix চেষ্টা
-    for (const [dw, dr] of digitFixes) {
-      for (let dp = 0; dp < dayStr.length; dp++) {
-        if (dayStr[dp] !== dw) continue;
-        const newDay = parseInt(dayStr.slice(0,dp) + dr + dayStr.slice(dp+1));
-        if (newDay < 1 || newDay > 31) continue;
-        for (const [mw, mr] of digitFixes) {
-          for (let mp = 0; mp < monStr.length; mp++) {
-            if (monStr[mp] !== mw) continue;
-            const newMon = parseInt(monStr.slice(0,mp) + mr + monStr.slice(mp+1));
-            if (newMon < 1 || newMon > 12) continue;
-            const newVal = newMon * 100 + newDay;
-            if (newVal <= nextMin) {
-              console.log('[FirstDateFix] Day+Month fix:', d.day+'.'+d.month, '→', newDay+'.'+newMon);
-              result[0] = {...d, day: String(newDay), month: String(newMon), raw: newDay+'.'+newMon};
-              return result;
-            }
-          }
-        }
-      }
-    }
-
-    console.log('[FirstDateFix] Could not auto-fix first date');
-    return result;
-  }
-
-  // ── Auto-correct misread digits to restore ascending order ──
-  function autoCorrectDates(dates) {
-    if (!dates || dates.length < 2) return dates;
-
-    const digitFixes = [
-      ['9','2'],['9','3'],['9','0'],
-      ['6','0'],['6','4'],['6','5'],
-      ['8','3'],['8','0'],
-      ['7','1'],['7','0'],
-      ['1','5'],['1','4'],  // ← 1→5, 1→4 (e.g. 11→15, 11→14)
-      ['5','4'],['4','5'],  // ← month fix (e.g. 05→04)
-      ['2','9'],['5','6'],['1','7']
-    ];
-
-    function tryFixDay(d, prev, nextVal, forceMon) {
-      const dayStr = String(parseInt(d.day)).padStart(2,'0');
-      const mon = forceMon !== undefined ? forceMon : parseInt(d.month);
-      for (const [wrong, right] of digitFixes) {
-        for (let pos = 0; pos < dayStr.length; pos++) {
-          if (dayStr[pos] !== wrong) continue;
-          const newDay = parseInt(dayStr.slice(0,pos) + right + dayStr.slice(pos+1));
-          if (newDay < 1 || newDay > 31) continue;
-          const newVal = mon*100 + newDay;
-          if (newVal >= prev && newVal <= nextVal) {
-            return {...d, day: String(newDay), month: String(mon), raw: newDay+'.'+mon};
-          }
-        }
-      }
-      return null;
-    }
-
-    // দুটো digit একসাথে ভুল — day + month দুটোই fix চেষ্টা করো
-    function tryFixDayAndMonth(d, prev, nextVal, forceMon) {
-      const dayStr = String(parseInt(d.day)).padStart(2,'0');
-      const monStr = forceMon ? String(forceMon).padStart(2,'0') : String(parseInt(d.month)).padStart(2,'0');
-      for (const [dw, dr] of digitFixes) {
-        for (let dp = 0; dp < dayStr.length; dp++) {
-          if (dayStr[dp] !== dw) continue;
-          const newDay = parseInt(dayStr.slice(0,dp) + dr + dayStr.slice(dp+1));
-          if (newDay < 1 || newDay > 31) continue;
-          for (const [mw, mr] of digitFixes) {
-            for (let mp = 0; mp < monStr.length; mp++) {
-              if (monStr[mp] !== mw) continue;
-              const newMon = parseInt(monStr.slice(0,mp) + mr + monStr.slice(mp+1));
-              if (newMon < 1 || newMon > 12) continue;
-              const newVal = newMon*100 + newDay;
-              if (newVal >= prev && newVal <= nextVal) {
-                return {...d, day: String(newDay), month: String(newMon), raw: newDay+'.'+newMon};
-              }
-            }
-          }
-        }
-      }
-      return null;
-    }
-
-    function tryFixMonth(d, prev, nextVal) {
-      const monStr = String(parseInt(d.month)).padStart(2,'0');
-      for (const [wrong, right] of digitFixes) {
-        for (let pos = 0; pos < monStr.length; pos++) {
-          if (monStr[pos] !== wrong) continue;
-          const newMon = parseInt(monStr.slice(0,pos) + right + monStr.slice(pos+1));
-          if (newMon < 1 || newMon > 12) continue;
-          const newVal = newMon*100 + parseInt(d.day);
-          if (newVal >= prev && newVal <= nextVal) {
-            return {...d, month: String(newMon), raw: d.day+'.'+newMon};
-          }
-        }
-      }
-      return null;
-    }
-
-    const result = dates.map(d => ({...d}));
-
-    // Multiple passes until stable
-    for (let pass = 0; pass < 5; pass++) {
-      let changed = false;
-      for (let i = 0; i < result.length; i++) {
-        const prev    = i > 0 ? toDateInt(result[i-1]) : 0;
-        const curr    = toDateInt(result[i]);
-        const nextVal = i+1 < result.length ? toDateInt(result[i+1]) : 9999;
-
-        // Fix if out of order: too small vs prev OR too big vs next
-        if (curr >= prev && curr <= nextVal) continue;
-
-        // ── Same-month sandwiching ──
-        // যদি prev ও next same month হয়, current date-এর month সেটাই হওয়া উচিত
-        let fixed = null;
-        if (i > 0 && i+1 < result.length) {
-          const prevMon  = parseInt(result[i-1].month);
-          const nextMon  = parseInt(result[i+1].month);
-          if (prevMon === nextMon) {
-            // Forced month দিয়ে day fix চেষ্টা
-            fixed = tryFixDay(result[i], prev, nextVal, prevMon)
-                 || tryFixDayAndMonth(result[i], prev, nextVal, prevMon);
-
-            // digitFix দিয়ে না হলে — prev ও next এর মাঝামাঝি যেকোনো valid day দাও
-            if (!fixed) {
-              const prevDay = parseInt(result[i-1].day);
-              const nextDay = parseInt(result[i+1].day);
-              if (nextDay > prevDay + 1) {
-                // মাঝে gap আছে — মাঝামাঝি day নাও
-                const midDay = prevDay + 1;
-                const midVal = prevMon * 100 + midDay;
-                if (midVal >= prev && midVal <= nextVal) {
-                  fixed = {...result[i], day: String(midDay), month: String(prevMon), raw: midDay+'.'+prevMon};
-                  console.log('[SandwichFill]', result[i].day+'.'+result[i].month, '→', midDay+'.'+prevMon);
-                }
-              }
-            }
-          }
-        }
-
-        if (!fixed) {
-          fixed = tryFixDay(result[i], prev, nextVal)
-               || tryFixMonth(result[i], prev, nextVal)
-               || tryFixDayAndMonth(result[i], prev, nextVal); // double misread
-        }
-
-        if (fixed) {
-          console.log('[AutoCorrect]', result[i].day+'.'+result[i].month, '→', fixed.day+'.'+fixed.month);
-          result[i] = fixed;
-          changed = true;
-        }
-      }
-      if (!changed) break;
-    }
-    return result;
-  }
-
-  function filterAscending(dates) {
-    const valid = [];
-    const skipped = [];
-    let lastVal = -1;
-    let yearOffset = 0; // year-wrap detect করার জন্য
-
-    dates.forEach((d, i) => {
-      const val = toDateInt(d);
-      if (val <= 0) {
-        valid.push({ ...d, skipped: true });
-        skipped.push(d);
-        return;
-      }
-
-      const adjustedVal = val + yearOffset * 1200; // 12 months offset
-
-      if (adjustedVal >= lastVal) {
-        valid.push({ ...d, skipped: false });
-        lastVal = adjustedVal;
-      } else {
-        // Year-wrap check: যদি new val + 1200 (১ বছর) দিলে ascending হয়
-        const wrappedVal = val + (yearOffset + 1) * 1200;
-        if (wrappedVal >= lastVal) {
-          // Year boundary cross হয়েছে — valid হিসেবে রাখো
-          yearOffset++;
-          valid.push({ ...d, skipped: false });
-          lastVal = wrappedVal;
-          console.log('[YearWrap] date', d.day+'.'+d.month, 'year boundary detected');
-        } else {
-          skipped.push(d);
-          valid.push({ ...d, skipped: true });
-        }
-      }
-    });
-    return { valid, skipped };
-  }
-
   function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
@@ -967,49 +561,40 @@ Return ONLY valid JSON, no markdown, no explanation:
       return;
     }
 
-    dates = autoCorrectFirstDate(dates); // প্রথম date fix (পরের dates দেখে)
-    const origFirst = dates[0] ? dates[0].day+'.'+dates[0].month : null;
-    dates = autoCorrectDates(dates); // বাকি digit misread fix
-    const fixedFirst = dates[0] ? dates[0].day+'.'+dates[0].month : null;
-    const firstWasFixed = origFirst && fixedFirst && origFirst !== fixedFirst;
-    const { valid, skipped } = filterAscending(dates);
-    const validOnly = valid.filter(d => !d.skipped);
-    const skippedCount = valid.filter(d => d.skipped).length;
-
     const label = document.createElement('div');
     label.className = 'section-label';
-    label.textContent = `Year: ${year || '—'} — ${validOnly.length} entries` + (skippedCount ? ` (${skippedCount}টি বাদ দেওয়া হয়েছে ↓)` : '');
-    if (firstWasFixed) {
-      const badge = document.createElement('span');
-      badge.style.cssText = 'margin-left:8px;background:#ff9900;color:#000;font-size:0.6rem;padding:2px 6px;border-radius:3px;font-weight:700;';
-      badge.textContent = '⚠ 1st date auto-fixed';
-      badge.title = 'প্রথম date টা OCR ভুল ছিল — পরের dates দেখে auto-correct করা হয়েছে';
-      label.appendChild(badge);
-    }
+    const validCount = dates.filter(d => !d.blank).length;
+    const blankCount = dates.filter(d => d.blank).length;
+    const blankInfo = blankCount > 0 ? ` · ${blankCount} blank/skipped` : '';
+    label.textContent = `Year: ${year || '—'} — ${validCount} valid${blankInfo}`;
     area.appendChild(label);
 
     const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    valid.forEach((d, i) => {
+    dates.forEach((d, i) => {
       const item = document.createElement('div');
       item.className = 'date-item';
       item.style.animationDelay = `${i * 0.04}s`;
-      const mName = monthNames[parseInt(d.month)] || d.month;
-      if (d.skipped) {
-        // বাদ দেওয়া date — ধূসর + strikethrough
-        item.style.cssText = 'opacity:0.35;text-decoration:line-through;filter:grayscale(1);';
-        item.title = '⚠ Descending date — বাদ দেওয়া হয়েছে';
+
+      if (d.blank) {
+        // Cross-marked / blank date — show visually distinct, will NOT be filled
+        item.style.opacity = '0.45';
+        item.style.borderColor = 'var(--danger)';
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value" style="color:var(--danger);text-decoration:line-through;">✕ BLANK</div>
+          <div class="date-full" style="color:var(--danger);">skip · not filled</div>
+        `;
+      } else {
+        const mName = monthNames[parseInt(d.month)] || d.month;
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value">${d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`}</div>
+          <div class="date-full">${d.day} ${mName} ${year || ''}</div>
+        `;
       }
-      item.innerHTML = `
-        <div class="date-num">${d.num}</div>
-        <div class="date-value">${d.day}.${d.month}${d.skipped ? ' ✕' : ''}</div>
-        <div class="date-full">${d.skipped ? '⚠ skipped' : d.day + ' ' + mName}</div>
-      `;
       area.appendChild(item);
     });
-
-    // extractedDates update — position ঠিক রেখে সব রাখো (skipped = blank)
-    extractedDates = valid.map(d => d.skipped ? { blank: true, num: d.num } : d);
   }
 
   function copyAll() {
