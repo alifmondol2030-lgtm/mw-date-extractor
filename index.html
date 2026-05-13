@@ -690,8 +690,8 @@
       const mName = monthNames[parseInt(d.month)] || d.month;
       item.innerHTML = `
         <div class="date-num">${d.num}</div>
-        <div class="date-value">${d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`}</div>
-        <div class="date-full">${d.day} ${mName} ${year || ''}</div>
+        <div class="date-value">${d.day}.${d.month}</div>
+        <div class="date-full">${d.day} ${mName}</div>
       `;
       area.appendChild(item);
     });
