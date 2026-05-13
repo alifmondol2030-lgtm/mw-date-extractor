@@ -594,21 +594,25 @@
                   text: `Look at this image. Find ALL dates in the Datum column.
 
 IMPORTANT RULES:
-1. Dates are handwritten in German format: DD.MM.YY or DD.MM.26
-2. Dates MUST be in STRICTLY ASCENDING order - each date must be greater than or equal to the previous
-3. If a date breaks ascending order, you MISREAD it - look again very carefully at each digit
-4. Common digit misreads in handwriting:
-   - 2 looks like 9 (most common!) → e.g. "20" misread as "29"
-   - 4 looks like 6 → e.g. "04" misread as "06"
-   - 1 looks like 7
+1. Dates may be written as DD.MM.YY, DD.MM.YYYY, or with GERMAN month names:
+   JAN=01, FEB=02, MRZ=03, APR=04, MAI=05, JUN=06,
+   JUL=07, AUG=08, SEP=09, OKT=10, NOV=11, DEZ=12
+   Convert month names to numbers: e.g. "15. APR. 2026" → day=15, month=04
+2. Read the DAY number very carefully — do NOT confuse with other columns.
+   The day is the FIRST number before the month.
+3. Common digit misreads in handwriting:
+   - 1 looks like 7 (critical! "15" misread as "75" or "11" as "71")
+   - 2 looks like 9 → e.g. "20" misread as "90"
+   - 4 looks like 6
    - 3 looks like 8
    - 0 looks like 6
-5. Self-check: after reading all dates, verify each is >= previous. If not, re-examine that digit.
-6. Example: sequence 18.03 → next looks like "29.03" but 29>18 so could be right OR it could be "20.03" misread - check carefully
-7. Return ALL rows that have dates, skip truly empty rows
+   - 5 looks like 6
+4. Dates may span MULTIPLE years (e.g. Oct 2025 followed by Apr 2026) — this is NORMAL, do not force ascending.
+5. Return ALL rows that have dates, skip truly empty rows.
+6. Double-check each day digit carefully before returning.
 
 Return ONLY valid JSON, no markdown, no explanation:
-{"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02"}]}`
+{"year":"2026","dates":[{"num":1,"raw":"15.04.26","day":"15","month":"04"}]}`
                 }
               ]
             }],
