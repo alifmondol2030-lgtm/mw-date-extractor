@@ -571,7 +571,17 @@
 
     const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    dates.forEach((d, i) => {
+    // Chronological sort: blank dates go to end, valid dates sorted by month→day
+    const sorted = [...dates].sort((a, b) => {
+      if (a.blank && b.blank) return 0;
+      if (a.blank) return 1;
+      if (b.blank) return -1;
+      const aVal = parseInt(a.month) * 100 + parseInt(a.day);
+      const bVal = parseInt(b.month) * 100 + parseInt(b.day);
+      return aVal - bVal;
+    });
+
+    sorted.forEach((d, i) => {
       const item = document.createElement('div');
       item.className = 'date-item';
       item.style.animationDelay = `${i * 0.04}s`;
@@ -594,7 +604,7 @@
         `;
       }
       area.appendChild(item);
-    });
+    }); // end sorted.forEach
   }
 
   function copyAll() {
