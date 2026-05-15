@@ -66,7 +66,7 @@
     align-items: center;
     gap: 8px;
   }
-  .badge  { background: var(--accent);  color: #000; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+  .badge      { background: var(--accent);  color: #000; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
   .badge-blue { background: var(--accent2); color: #fff; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
 
   #drop-zone {
@@ -99,7 +99,7 @@
     padding: 8px 16px;
     border-bottom: 1px solid var(--border);
     display: flex; gap: 8px; align-items: center;
-    background: rgba(0,153,255,0.04);
+    background: rgba(0,255,136,0.04);
   }
 
   #action-bar {
@@ -174,8 +174,8 @@
     animation: fadeIn 0.25s ease both;
   }
   .result-table tr:hover td { background: rgba(0,255,136,0.03); }
-  .col-n    { color: var(--muted); font-size: 0.65rem; width: 30px; }
-  .col-code { color: var(--accent); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em; }
+  .col-n         { color: var(--muted); font-size: 0.65rem; width: 30px; }
+  .col-code      { color: var(--accent); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.06em; }
   .col-count-val { color: var(--accent2); font-weight: 700; font-size: 1rem; }
   .col-count-nil { color: var(--muted); font-style: italic; font-size: 0.78rem; }
 
@@ -209,7 +209,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Number Extractor</h1>
-  <span>v2.0 — Claude AI · 5-Digit Number + Count</span>
+  <span>v2.1 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
 </header>
 
 <main>
@@ -235,11 +235,11 @@
   <div id="right-panel">
     <div class="panel-header">🔢 Extracted Numbers &amp; Counts</div>
 
-    <!-- API Key -->
+    <!-- Groq API Key -->
     <div id="key-bar">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">CLAUDE API KEY:</span>
-      <input id="api-key-input" type="password" placeholder="sk-ant-..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
-      <button onclick="saveKey()" style="background:#0099ff;color:#fff;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GROQ KEY:</span>
+      <input id="api-key-input" type="password" placeholder="gsk_..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#00ff88;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
     </div>
 
     <div id="action-bar">
@@ -261,7 +261,7 @@
     </div>
 
     <footer>
-      <span>Powered by Claude AI (claude-sonnet-4-20250514)</span>
+      <span>Powered by Groq AI (Llama 4 Scout)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -275,20 +275,20 @@
   let extractedNumbers   = [];
 
   // Restore saved key
-  document.getElementById('api-key-input').value = localStorage.getItem('claude_key') || '';
+  document.getElementById('api-key-input').value = localStorage.getItem('groq_key') || '';
 
   function saveKey() {
-    localStorage.setItem('claude_key', document.getElementById('api-key-input').value.trim());
+    localStorage.setItem('groq_key', document.getElementById('api-key-input').value.trim());
     showToast('Key saved!');
   }
 
   // Restore last session
   (function restore() {
     try {
-      const savedImg  = localStorage.getItem('mw_last_image');
-      const savedMime = localStorage.getItem('mw_last_mime');
-      const savedData = localStorage.getItem('mw_last_numbers');
-      const savedTs   = localStorage.getItem('mw_last_ts');
+      const savedImg  = localStorage.getItem('mw_num_last_image');
+      const savedMime = localStorage.getItem('mw_num_last_mime');
+      const savedData = localStorage.getItem('mw_num_last_numbers');
+      const savedTs   = localStorage.getItem('mw_num_last_ts');
 
       if (savedImg) {
         const mime = savedMime || 'image/png';
@@ -303,13 +303,13 @@
         renderNumbers(extractedNumbers);
         document.getElementById('copy-btn').disabled = false;
         document.getElementById('count-display').textContent = extractedNumbers.length + ' numbers found';
-        let ts = savedTs ? ' · ' + new Date(parseInt(savedTs)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+        const ts = savedTs ? ' · ' + new Date(parseInt(savedTs)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
         setStatus('done', '✓ Last result restored' + ts);
       }
     } catch(e) {}
   })();
 
-  // Image loading
+  // Image handlers
   const fileInput  = document.getElementById('file-input');
   const dropZone   = document.getElementById('drop-zone');
   const previewImg = document.getElementById('preview-img');
@@ -339,53 +339,55 @@
       document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — Extract Numbers বাটন চাপো');
       try {
-        localStorage.setItem('mw_last_image', currentImageBase64);
-        localStorage.setItem('mw_last_mime',  currentImageMime);
+        localStorage.setItem('mw_num_last_image', currentImageBase64);
+        localStorage.setItem('mw_num_last_mime',  currentImageMime);
       } catch(e) {}
     };
     reader.readAsDataURL(file);
   }
 
-  // ── EXTRACT ──
+  // ── EXTRACT via Groq ──
   async function extractNumbers() {
     if (!currentImageBase64) return;
-    const KEY = localStorage.getItem('claude_key') || '';
-    if (!KEY) { setStatus('error', '✗ Claude API Key নেই — উপরে দাও'); return; }
+    const KEY = localStorage.getItem('groq_key') || '';
+    if (!KEY) { setStatus('error', '✗ Groq API Key নেই — উপরে দাও'); return; }
 
-    setStatus('running', 'Claude AI-তে পাঠানো হচ্ছে...');
+    setStatus('running', 'Groq AI-তে পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': KEY,
-          'anthropic-version': '2023-06-01'
+          'Authorization': `Bearer ${KEY}`
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          temperature: 0,
           max_tokens: 1000,
           messages: [{
             role: 'user',
             content: [
               {
-                type: 'image',
-                source: { type: 'base64', media_type: currentImageMime, data: currentImageBase64 }
+                type: 'image_url',
+                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
               },
               {
                 type: 'text',
-                text: `Look at this image carefully. Find ALL 5-digit numbers (exactly 5 digits) along with their count.
+                text: `Look at this image carefully. Find ALL 5-digit numbers (exactly 5 digits) and their associated count.
 
-Rules:
-- Extract ONLY 5-digit numbers (20501, 29701, 20535, 29944, 29950 etc.)
-- The count is the small number (1–20) written right next to the 5-digit number
-- If a 5-digit number has no count, set count to null
-- IGNORE: Euro amounts (€27,76), decimal pairs (56,08 · 462,56), 6-digit numbers (888024)
-- German handwriting: "1" can look like "7" — be careful
-- Return ONLY valid JSON, no markdown:
-{"numbers":[{"num":1,"code":"20501","count":"6"},{"num":2,"code":"29701","count":"1"},{"num":3,"code":"29944","count":null}]}`
+RULES:
+- Extract ONLY 5-digit numbers (e.g. 20501, 29701, 20535, 20537, 20548, 29944, 29950 etc.)
+- The count = the small number (1 to 20) written right after the 5-digit number on the same line
+- If a 5-digit number has NO count next to it, set count to null
+- IGNORE: Euro amounts like €27,76 or €31,60 — NOT 5-digit numbers
+- IGNORE: Decimal pairs like 56,08 or 96,15 or 920,20 — NOT 5-digit numbers  
+- IGNORE: 6-digit or longer numbers like 888024
+- CAUTION: German handwriting — "1" looks like "7". Read carefully.
+- Return ONLY valid JSON, no markdown, no extra text:
+{"numbers":[{"num":1,"code":"20524","count":"1"},{"num":2,"code":"20537","count":"14"},{"num":3,"code":"20548","count":"1"}]}`
               }
             ]
           }]
@@ -395,7 +397,7 @@ Rules:
       const data = await resp.json();
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      const raw    = data.content?.[0]?.text || '';
+      const raw    = data.choices?.[0]?.message?.content || '';
       const clean  = raw.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
@@ -413,8 +415,8 @@ Rules:
       document.getElementById('count-display').textContent = extractedNumbers.length + ' numbers found';
 
       try {
-        localStorage.setItem('mw_last_numbers', JSON.stringify(extractedNumbers));
-        localStorage.setItem('mw_last_ts', Date.now().toString());
+        localStorage.setItem('mw_num_last_numbers', JSON.stringify(extractedNumbers));
+        localStorage.setItem('mw_num_last_ts', Date.now().toString());
       } catch(e) {}
 
     } catch(err) {
@@ -492,7 +494,8 @@ Rules:
     document.getElementById('count-display').textContent = '—';
     setStatus('idle', 'Screenshot upload করো তারপর Extract করো');
     try {
-      ['mw_last_numbers','mw_last_image','mw_last_mime','mw_last_ts'].forEach(k => localStorage.removeItem(k));
+      ['mw_num_last_numbers','mw_num_last_image','mw_num_last_mime','mw_num_last_ts']
+        .forEach(k => localStorage.removeItem(k));
     } catch(e) {}
   }
 
