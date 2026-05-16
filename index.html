@@ -209,7 +209,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Number Extractor</h1>
-  <span>v2.5 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
+  <span>v2.6 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
 </header>
 
 <main>
@@ -376,7 +376,11 @@
 STRICT RULES:
 - Extract ONLY proper 5-digit numbers that start with 2 or 3 (e.g. 20501, 29701, 20535, 33018 etc.)
 - A valid 5-digit number looks like handwritten digits clearly forming a number like 20501 or 33018
-- The count = the small number (1 to 20) written right after the 5-digit number on the same line
+- The count = the small number written right after the 5-digit number on the same line
+- COUNT RULES (very important):
+  * If the number after 5-digit is between 1-20 → use it directly as count (e.g. 6→6, 16→16, 20→20)
+  * If the number after 5-digit is between 21-40 → take ONLY the FIRST digit as count (e.g. 24→2, 34→3, 31→3)
+  * If the number after 5-digit is greater than 40 (like 924, 100, 50 etc.) → it is NOT a count, set count to null
 - If a 5-digit number has NO count next to it, set count to null
 
 STRICT IGNORE LIST — do NOT extract these:
