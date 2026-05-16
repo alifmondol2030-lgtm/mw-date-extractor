@@ -209,7 +209,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Number Extractor</h1>
-  <span>v2.4 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
+  <span>v2.5 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
 </header>
 
 <main>
@@ -373,14 +373,22 @@
                 type: 'text',
                 text: `Look at this image carefully. Find ALL 5-digit numbers (exactly 5 digits) and their associated count.
 
-RULES:
-- Extract ONLY 5-digit numbers (e.g. 20501, 29701, 20535, 20537, 20548, 29944, 29950 etc.)
+STRICT RULES:
+- Extract ONLY proper 5-digit numbers that start with 2 or 3 (e.g. 20501, 29701, 20535, 33018 etc.)
+- A valid 5-digit number looks like handwritten digits clearly forming a number like 20501 or 33018
 - The count = the small number (1 to 20) written right after the 5-digit number on the same line
 - If a 5-digit number has NO count next to it, set count to null
-- IGNORE: Euro amounts like €27,76 or €31,60 — NOT 5-digit numbers
-- IGNORE: Decimal pairs like 56,08 or 96,15 or 920,20 — NOT 5-digit numbers  
-- IGNORE: 6-digit or longer numbers like 888024
-- CAUTION: German handwriting — "1" looks like "7". Read carefully.
+
+STRICT IGNORE LIST — do NOT extract these:
+- Euro/price amounts like €27,76 or 300,30 or 3oo,3of — these have commas, NOT 5-digit numbers
+- ANY text with commas like 56,08 or 96,15 or 920,20 — commas mean it is a price, IGNORE
+- Cursive/decorative text that looks like price tags or totals at the bottom
+- 6-digit or longer numbers like 888024
+- Random scribbles or unclear marks
+
+IMPORTANT: If the bottom part of the image has cursive writing with commas (like price amounts), completely IGNORE that entire section. Only read clear handwritten 5-digit numbers.
+
+CAUTION: German handwriting — "1" looks like "7". Read carefully.
 - Return ONLY valid JSON, no markdown, no extra text:
 {"numbers":[{"num":1,"code":"20524","count":"1"},{"num":2,"code":"20537","count":"14"},{"num":3,"code":"20548","count":"1"}]}`
               }
