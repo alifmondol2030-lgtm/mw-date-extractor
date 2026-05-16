@@ -209,7 +209,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Number Extractor</h1>
-  <span>v2.3 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
+  <span>v2.4 — Groq (Llama 4 Scout) · 5-Digit + Count</span>
 </header>
 
 <main>
@@ -394,13 +394,13 @@ RULES:
 
       const raw = data.choices?.[0]?.message?.content || '';
 
-      // ✅ নতুন চেক: JSON না হলে আগেই error দেখাও
-      if (!raw.trim().startsWith('{')) {
+      // ✅ backtick এবং markdown সরিয়ে JSON বের করো
+      const clean = raw.replace(/```json|```/gi, '').trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (!match) {
         throw new Error('Model JSON দেয়নি। Model বলেছে: ' + raw.slice(0, 150));
       }
-
-      const clean  = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
+      const parsed = JSON.parse(match[0]);
 
       extractedNumbers = parsed.numbers || [];
       renderNumbers(extractedNumbers);
