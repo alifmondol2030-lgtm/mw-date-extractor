@@ -157,6 +157,13 @@
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+  /* DEBUG toggle button */
+  #debug-btn {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    font-size: 0.65rem; padding: 6px 10px;
+  }
+  #debug-btn.active { color: #ffcc00; border-color: #ffcc00; }
+
   #status {
     padding: 10px 16px; font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem; min-height: 36px; border-bottom: 1px solid var(--border);
@@ -202,6 +209,30 @@
   .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
   .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
+  /* DEBUG panel */
+  #debug-panel {
+    display: none;
+    background: #0d0d18;
+    border: 1px solid #ffcc0044;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 4px;
+  }
+  #debug-panel.show { display: block; }
+  #debug-panel .debug-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem; color: #ffcc00; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  #debug-raw {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    color: #aaa; white-space: pre-wrap; line-height: 1.6;
+    max-height: 200px; overflow-y: auto;
+    word-break: break-all;
+  }
+  #debug-raw::-webkit-scrollbar { width: 3px; }
+  #debug-raw::-webkit-scrollbar-thumb { background: #ffcc0033; }
+
   .raw-box {
     background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px;
     font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted);
@@ -235,7 +266,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.2 — OpenRouter Auto-Router · 3-Key Rotation · Auto-OCR</span>
+  <span>v2.3 — Debug Mode · Better Error Handling</span>
 </header>
 
 <div id="auto-banner">⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...</div>
@@ -284,18 +315,20 @@
     <div id="model-bar">
       <span class="model-label">🤖 MODEL:</span>
       <select id="model-select" onchange="saveModel()">
-        <option value="openrouter/free">openrouter/free — Auto Best Available ✨</option>
+        <option value="openrouter/auto">openrouter/auto — Auto Best Available ✨</option>
         <option value="meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 11B Vision (free)</option>
         <option value="google/gemma-3-27b-it:free">Gemma 3 27B (free)</option>
         <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B (free)</option>
         <option value="moonshotai/kimi-vl-a3b-thinking:free">Kimi VL A3B Thinking (free)</option>
-        <option value="qwen/qwen2.5-vl-32b-instruct:free">Qwen 2.5 VL 32B (free)</option>
+        <option value="qwen/qwen2.5-vl-32b-instruct:free">Qwen 2.5 VL 32B (free) ⭐</option>
+        <option value="google/gemini-flash-1.5">Gemini Flash 1.5 (paid)</option>
       </select>
     </div>
 
     <div id="action-bar">
       <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
       <button id="copy-btn" disabled onclick="copyAll()">📋 Copy All</button>
+      <button id="debug-btn" onclick="toggleDebug()">🐛 DEBUG</button>
       <button id="clear-btn" onclick="clearAll()">✕ Clear</button>
     </div>
 
@@ -312,7 +345,7 @@
     </div>
 
     <footer>
-      <span id="footer-model">Powered by OpenRouter (Auto Free Router)</span>
+      <span id="footer-model">Powered by OpenRouter (Auto Router)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -324,16 +357,44 @@
   let currentImageBase64 = null;
   let extractedDates = [];
   let currentKeyIndex = 0;
+  let debugMode = false;
 
+  // ── Debug toggle ──────────────────────────────────────────────
+  function toggleDebug() {
+    debugMode = !debugMode;
+    document.getElementById('debug-btn').classList.toggle('active', debugMode);
+    document.getElementById('debug-btn').textContent = debugMode ? '🐛 DEBUG ON' : '🐛 DEBUG';
+    // ensure panel exists
+    let dp = document.getElementById('debug-panel');
+    if (dp) dp.classList.toggle('show', debugMode);
+  }
+
+  function showDebug(label, content) {
+    let dp = document.getElementById('debug-panel');
+    if (!dp) {
+      dp = document.createElement('div');
+      dp.id = 'debug-panel';
+      dp.innerHTML = '<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw"></pre>';
+      const ra = document.getElementById('results-area');
+      ra.insertBefore(dp, ra.firstChild);
+    }
+    dp.classList.toggle('show', debugMode);
+    const raw = document.getElementById('debug-raw');
+    if (raw) raw.textContent = `[${label}]\n${content}`;
+  }
+
+  // ── Model / Key helpers ───────────────────────────────────────
   function saveModel() {
     const sel = document.getElementById('model-select');
     localStorage.setItem('or_model', sel.value);
     document.getElementById('footer-model').textContent = 'Model: ' + sel.selectedOptions[0].text;
   }
   function loadModel() {
-    const saved = localStorage.getItem('or_model') || 'openrouter/free';
+    const saved = localStorage.getItem('or_model') || 'openrouter/auto';
     const sel = document.getElementById('model-select');
-    sel.value = saved;
+    // fallback: if saved value not in options, reset to auto
+    if ([...sel.options].some(o => o.value === saved)) sel.value = saved;
+    else { sel.value = 'openrouter/auto'; localStorage.setItem('or_model','openrouter/auto'); }
     document.getElementById('footer-model').textContent = 'Model: ' + (sel.selectedOptions[0]?.text || saved);
   }
 
@@ -369,7 +430,7 @@
   loadKeys();
   loadModel();
 
-  // Restore last result
+  // ── Restore last result ───────────────────────────────────────
   (function() {
     try {
       const savedImg   = localStorage.getItem('mw_ocr_last_image');
@@ -377,7 +438,6 @@
       const savedDates = localStorage.getItem('mw_ocr_last_dates');
       const savedYear  = localStorage.getItem('mw_ocr_last_year');
       const savedTs    = localStorage.getItem('mw_ocr_last_result_ts');
-
       if (savedImg) {
         const mime = savedMime || 'image/png';
         document.getElementById('preview-img').src = 'data:' + mime + ';base64,' + savedImg;
@@ -397,19 +457,19 @@
     } catch(e) {}
   })();
 
-  // File input / drag / paste
-  document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+  // ── File input / drag / paste ─────────────────────────────────
+  document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
   const dropZone = document.getElementById('drop-zone');
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background='rgba(0,255,136,0.06)'; });
   dropZone.addEventListener('dragleave', () => { dropZone.style.background=''; });
   dropZone.addEventListener('drop', e => {
     e.preventDefault(); dropZone.style.background='';
     const f = e.dataTransfer.files[0];
-    if (f && f.type.startsWith('image/')) loadImage(f);
+    if (f && f.type.startsWith('image/')) loadImageFile(f);
   });
   document.addEventListener('paste', e => {
     for (const item of e.clipboardData.items)
-      if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
+      if (item.type.startsWith('image/')) { loadImageFile(item.getAsFile()); break; }
   });
 
   function loadImageFromBase64(base64, mime) {
@@ -440,7 +500,7 @@
     setTimeout(() => extractDates(), 800);
   });
 
-  function loadImage(file) {
+  function loadImageFile(file) {
     const reader = new FileReader();
     reader.onload = ev => {
       const dataUrl = ev.target.result;
@@ -453,11 +513,21 @@
     reader.readAsDataURL(file);
   }
 
+  // ── Core API call ─────────────────────────────────────────────
   async function callOpenRouter(base64, keyIndex) {
     const keys = getKeys();
     if (!keys.length) throw new Error('কোনো API Key নেই! উপরে KEY বক্সে দিন।');
     const key   = keys[keyIndex % keys.length];
-    const model = localStorage.getItem('or_model') || 'openrouter/free';
+    const model = localStorage.getItem('or_model') || 'openrouter/auto';
+
+    const PROMPT = `You are a precise OCR assistant. Look at this image carefully.
+Find the "Datum" column (date column). Extract ALL date rows including crossed-out or blank ones.
+For each date row:
+- If it has a date like "23.09.22" → return {num, raw, day, month, blank:false}
+- If the cell is empty or has X or is crossed out → return {num, raw:"X", blank:true}
+
+Respond ONLY with a valid JSON object. No markdown. No explanation. No extra text.
+Format: {"year":"2022","dates":[{"num":1,"raw":"02.09.22","day":"02","month":"09","blank":false},{"num":2,"raw":"X","blank":true}]}`;
 
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -473,29 +543,57 @@
           role: 'user',
           content: [
             { type: 'image_url', image_url: { url: `data:image/png;base64,${base64}` } },
-            { type: 'text', text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}' }
+            { type: 'text', text: PROMPT }
           ]
         }],
         temperature: 0,
-        max_tokens: 1000
+        max_tokens: 1500
       })
     });
 
-    const data = await resp.json();
+    // ── Capture raw response for debug ──
+    const rawText = await resp.text();
+    showDebug(`HTTP ${resp.status} · model=${model} · key=${keyIndex+1}`, rawText);
+
+    if (!resp.ok) {
+      let errMsg = `HTTP ${resp.status}`;
+      try { const j = JSON.parse(rawText); errMsg = j.error?.message || errMsg; } catch(e) {}
+      throw new Error(errMsg);
+    }
+
+    let data;
+    try { data = JSON.parse(rawText); } catch(e) { throw new Error('Invalid JSON from API: ' + rawText.slice(0,200)); }
+
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    return data;
+
+    // ── Check for empty/missing content ──
+    const choice = data.choices?.[0];
+    if (!choice) throw new Error('No choices in response. Full response: ' + rawText.slice(0,400));
+
+    const content = choice.message?.content;
+    if (!content || content.trim() === '') {
+      // Check finish_reason
+      const reason = choice.finish_reason || 'unknown';
+      throw new Error(`Empty content from model (finish_reason: ${reason}). Model may not support vision or rate-limited. Try a different model.`);
+    }
+
+    return { content, rawResponse: rawText };
   }
 
+  // ── Extract dates orchestrator ────────────────────────────────
   async function extractDates() {
     if (!currentImageBase64) return;
     const keys = getKeys();
     if (!keys.length) { setStatus('error', '✗ API Key নেই — KEY 1 বক্সে দিন'); return; }
 
-    const modelText = document.getElementById('model-select').selectedOptions[0]?.text || '';
     document.getElementById('extract-btn').disabled = true;
     const emptyEl = document.getElementById('empty-state');
     if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
+
+    // Remove old debug panel (will be recreated fresh)
+    const oldDp = document.getElementById('debug-panel');
+    if (oldDp) oldDp.remove();
 
     let lastError = null;
 
@@ -503,13 +601,30 @@
       const keyIdx = (currentKeyIndex + attempt) % keys.length;
       try {
         setStatus('running', `AI-তে পাঠানো হচ্ছে... (KEY ${keyIdx + 1})`);
-        const data = await callOpenRouter(currentImageBase64, keyIdx);
-        const rawText = data.choices?.[0]?.message?.content || '';
+        const { content } = await callOpenRouter(currentImageBase64, keyIdx);
 
-        // Robust JSON extract
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('JSON পাওয়া যায়নি। Response:\n' + rawText.slice(0, 300));
-        const parsed = JSON.parse(jsonMatch[0]);
+        // ── Robust JSON extraction ──
+        // 1) try direct parse
+        // 2) try regex to find {...}
+        // 3) try stripping markdown fences
+        let parsed = null;
+        const attempts = [
+          () => JSON.parse(content),
+          () => { const m = content.match(/\{[\s\S]*\}/); if (!m) throw new Error('no match'); return JSON.parse(m[0]); },
+          () => { const stripped = content.replace(/```json|```/gi,'').trim(); return JSON.parse(stripped); },
+          () => { const m = content.replace(/```json|```/gi,'').match(/\{[\s\S]*\}/); if (!m) throw new Error('no match'); return JSON.parse(m[0]); }
+        ];
+        for (const fn of attempts) {
+          try { parsed = fn(); break; } catch(e) {}
+        }
+
+        if (!parsed) {
+          throw new Error(
+            'JSON parse করা যায়নি। Model এর raw response:\n\n' +
+            content.slice(0, 600) +
+            (content.length > 600 ? '\n...(truncated)' : '')
+          );
+        }
 
         extractedDates = parsed.dates || [];
         const validDates = extractedDates.filter(d => !d.blank);
@@ -529,11 +644,6 @@
           localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
         } catch(e) {}
 
-        try {
-          if (typeof chrome !== 'undefined' && chrome.storage?.local)
-            chrome.storage.local.set({ mw_ocr_last_dates: extractedDates, mw_ocr_last_year: parsed.year||'', mw_ocr_last_result_ts: Date.now() });
-        } catch(e) {}
-
         document.getElementById('extract-btn').disabled = false;
         return;
 
@@ -547,17 +657,41 @@
       }
     }
 
-    setStatus('error', '✗ সব key fail: ' + (lastError?.message || 'Unknown'));
+    // ── All keys failed — show detailed error + suggestions ──
+    const errMsg = lastError?.message || 'Unknown error';
+    setStatus('error', '✗ Failed: ' + errMsg.split('\n')[0]);
     document.getElementById('results-area').innerHTML =
-      `<div class="raw-box">Error: ${lastError?.message}\n\n💡 সমাধান:\n1. উপরের MODEL dropdown থেকে অন্য model বেছে নিন\n2. কিছুক্ষণ পর আবার try করুন\n3. openrouter.ai থেকে নতুন key নিন</div>`;
+      `<div class="raw-box">❌ Error: ${escHtml(errMsg)}
+
+💡 সমাধান:
+1. 🐛 উপরে DEBUG বাটন চাপুন → raw response দেখুন কী আসছে
+2. 🔄 MODEL dropdown থেকে "Qwen 2.5 VL 32B (free) ⭐" বেছে নিন (vision সাপোর্ট ভালো)
+3. ⏳ কিছুক্ষণ পর আবার try করুন (rate limit হয়ে থাকতে পারে)
+4. 🔑 openrouter.ai থেকে নতুন key নিন
+5. 💳 Paid model (Gemini Flash) ব্যবহার করুন</div>`;
     document.getElementById('extract-btn').disabled = false;
   }
 
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Render ────────────────────────────────────────────────────
   function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
+
+    // Re-insert debug panel if active
+    if (debugMode) {
+      const dp = document.createElement('div');
+      dp.id = 'debug-panel';
+      dp.className = 'show';
+      dp.innerHTML = '<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw">—</pre>';
+      area.appendChild(dp);
+    }
+
     if (!dates?.length) {
-      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
+      area.innerHTML += '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
       return;
     }
     const label = document.createElement('div');
@@ -584,7 +718,7 @@
         item.innerHTML = `<div class="date-num">${d.num}</div><div class="date-value" style="color:var(--danger);text-decoration:line-through;">✕ BLANK</div><div class="date-full" style="color:var(--danger);">skip · not filled</div>`;
       } else {
         const mName = months[parseInt(d.month)] || d.month;
-        item.innerHTML = `<div class="date-num">${d.num}</div><div class="date-value">${d.raw||`${d.day}.${d.month}.${(year||'').slice(-2)}`}</div><div class="date-full">${d.day} ${mName} ${year||''}</div>`;
+        item.innerHTML = `<div class="date-num">${d.num}</div><div class="date-value">${escHtml(d.raw||`${d.day}.${d.month}.${(year||'').slice(-2)}`)}</div><div class="date-full">${d.day} ${mName} ${year||''}</div>`;
       }
       area.appendChild(item);
     });
