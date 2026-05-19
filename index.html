@@ -1,621 +1,654 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MW Date Extractor</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MW Date Extractor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
 
-    :root {
-      --bg: #07090f;
-      --surface: #0e1017;
-      --surface2: #161923;
-      --border: #1e2330;
-      --border2: #2a3045;
-      --accent: #00d4ff;
-      --accent2: #0099bb;
-      --pink: #ff3d7f;
-      --text: #dde4f0;
-      --muted: #4a5470;
-      --success: #00e5a0;
-      --warn: #ffb700;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
-    }
+  :root {
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --border: #1e1e2e;
+    --accent: #00ff88;
+    --accent2: #0099ff;
+    --text: #e0e0f0;
+    --muted: #555570;
+    --danger: #ff4466;
+  }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 48px 16px 100px;
-      position: relative;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.012) 2px,rgba(0,212,255,0.012) 4px);
-      pointer-events: none;
-      z-index: 100;
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 600px; height: 300px;
-      background: radial-gradient(ellipse at top left, rgba(0,212,255,0.06), transparent 70%);
-      pointer-events: none;
-    }
+  header {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--panel);
+  }
+  header .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+  header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
-    .wrap { width: 100%; max-width: 720px; position: relative; z-index: 1; }
+  /* Auto-receive banner */
+  #auto-banner {
+    display: none;
+    padding: 8px 20px;
+    background: rgba(0,255,136,0.08);
+    border-bottom: 1px solid var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.06em;
+    animation: banner-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes banner-pulse {
+    0%,100% { background: rgba(0,255,136,0.08); }
+    50%      { background: rgba(0,255,136,0.14); }
+  }
+  #auto-banner.show { display: block; }
 
-    header { margin-bottom: 44px; }
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: calc(100vh - 57px);
+  }
 
-    .sys-line {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.12em;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+  #left-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
 
-    .sys-line::before {
-      content: '';
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: blink 2s infinite;
-    }
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header .badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .panel-header .badge-blue {
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
 
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  #drop-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  #drop-zone:hover { background: rgba(0,255,136,0.03); }
+  #drop-zone.has-image { justify-content: flex-start; padding: 0; }
 
-    h1 {
-      font-family: var(--mono);
-      font-size: clamp(22px, 4.5vw, 38px);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.1;
-      margin-bottom: 8px;
-    }
+  #drop-zone .placeholder { text-align: center; pointer-events: none; }
+  #drop-zone .placeholder .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+  #drop-zone .placeholder p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  #drop-zone .placeholder p strong { color: var(--accent); }
 
-    h1 span { color: var(--accent); }
+  #preview-img {
+    width: 100%; height: 100%;
+    object-fit: contain; display: none; padding: 12px;
+  }
+  #drop-zone.has-image #preview-img { display: block; }
+  #drop-zone.has-image .placeholder { display: none; }
+  #file-input { display: none; }
 
-    .tagline { font-size: 13px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.04em; }
+  #right-panel { display: flex; flex-direction: column; }
 
-    .h-rule {
-      height: 1px;
-      background: linear-gradient(90deg, var(--accent), rgba(0,212,255,0.1), transparent);
-      margin: 24px 0 0;
-    }
+  #action-bar {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: center;
+  }
 
-    /* ── DEBUG PANEL ── */
-    .debug-panel {
-      display: none;
-      border: 1px solid rgba(255,183,0,0.3);
-      border-radius: 8px;
-      padding: 14px 18px;
-      background: rgba(255,183,0,0.05);
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--warn);
-      margin-bottom: 16px;
-      line-height: 1.7;
-    }
-    .debug-panel.show { display: block; }
-    .debug-panel strong { color: #fff; }
+  button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 700;
+    padding: 9px 18px; border: none; border-radius: 5px;
+    cursor: pointer; letter-spacing: 0.08em;
+    text-transform: uppercase; transition: all 0.15s;
+  }
 
-    /* ── UPLOAD ZONE ── */
-    .upload-zone {
-      border: 1px dashed var(--border2);
-      border-radius: 12px;
-      padding: 48px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s;
-      background: var(--surface);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
+  #extract-btn { background: var(--accent); color: #000; flex: 1; }
+  #extract-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
+  #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .upload-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(0,212,255,0.03), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
+  #clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  #clear-btn:hover { border-color: var(--danger); color: var(--danger); }
 
-    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(0,212,255,0.03); }
-    .upload-zone:hover::before, .upload-zone.drag::before { opacity: 1; }
-    .upload-zone input { display: none; }
+  #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+  #copy-btn:hover { background: var(--accent2); color: #000; }
+  #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .upload-icon {
-      width: 56px; height: 56px;
-      margin: 0 auto 16px;
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--surface2);
-      transition: border-color 0.2s;
-    }
+  #status {
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; min-height: 36px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted); display: flex; align-items: center; gap: 8px;
+  }
+  #status.running { color: var(--accent2); }
+  #status.done { color: var(--accent); }
+  #status.error { color: var(--danger); }
 
-    .upload-zone:hover .upload-icon { border-color: var(--accent); }
-    .upload-icon svg { opacity: 0.6; transition: opacity 0.2s; }
-    .upload-zone:hover .upload-icon svg { opacity: 1; }
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid transparent; border-top-color: currentColor;
+    border-radius: 50%; animation: spin 0.6s linear infinite; display: none;
+  }
+  .running .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    .upload-title { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-    .upload-sub { font-size: 12px; color: var(--muted); font-family: var(--mono); }
-    .upload-sub span { color: var(--accent); cursor: pointer; }
+  #results-area {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
 
-    /* Preview */
-    .preview-wrap { display: none; margin-bottom: 20px; border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; background: var(--surface); }
-    .preview-wrap.show { display: block; }
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center;
+  }
+  .empty-state .icon { font-size: 2.5rem; opacity: 0.2; }
 
-    .preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-    }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
 
-    .preview-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+  .date-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 6px;
+    transition: border-color 0.15s; animation: fadeIn 0.25s ease both;
+  }
+  .date-item:hover { border-color: var(--accent); }
+  @keyframes fadeIn { from { opacity:0; transform: translateX(10px); } to { opacity:1; transform: none; } }
 
-    .btn-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 4px; transition: color 0.2s; }
-    .btn-remove:hover { color: var(--pink); }
+  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 22px; text-align: right; flex-shrink: 0; }
+  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
+  .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-    .preview-img { width: 100%; max-height: 280px; object-fit: contain; display: block; padding: 16px; background: #000; }
+  .raw-box {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; color: var(--muted);
+    white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
+  }
 
-    /* ── BUTTON ── */
-    .btn-extract {
-      width: 100%;
-      padding: 15px;
-      background: transparent;
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      color: var(--accent);
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-    }
+  footer {
+    padding: 10px 20px; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); display: flex; justify-content: space-between;
+  }
+  #count-display { color: var(--accent2); }
 
-    .btn-extract::before { content: ''; position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
-    .btn-extract:hover:not(:disabled) { color: var(--bg); box-shadow: 0 0 24px rgba(0,212,255,0.3); }
-    .btn-extract:hover:not(:disabled)::before { opacity: 1; }
-    .btn-extract span, .btn-extract svg { position: relative; z-index: 1; }
-    .btn-extract:disabled { opacity: 0.4; cursor: not-allowed; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--accent); color: #000;
+    padding: 10px 22px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 700;
+    transition: transform 0.3s; z-index: 999; pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ── STATUS ── */
-    .status { display: none; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 8px; font-family: var(--mono); font-size: 12px; margin-bottom: 20px; border: 1px solid; }
-    .status.loading { display: flex; border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.05); color: var(--accent); }
-    .status.error { display: flex; border-color: rgba(255,61,127,0.25); background: rgba(255,61,127,0.06); color: var(--pink); }
-
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(0,212,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── RESULTS ── */
-    .result-wrap { display: none; border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; background: var(--surface); }
-    .result-wrap.show { display: block; }
-
-    .result-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
-    .result-top-left { display: flex; align-items: center; gap: 10px; }
-    .dot-ok { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .result-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--success); }
-
-    .btn-copy { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 5px 12px; cursor: pointer; transition: all 0.2s; }
-    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
-
-    .date-table { width: 100%; border-collapse: collapse; font-family: var(--mono); }
-    .date-table th { padding: 10px 20px; text-align: left; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
-    .date-table td { padding: 12px 20px; font-size: 13px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
-    .date-table tr:last-child td { border-bottom: none; }
-    .date-table tr:hover td { background: rgba(0,212,255,0.03); }
-
-    .td-num { color: var(--muted); font-size: 11px; width: 50px; }
-    .td-raw { color: var(--warn); font-weight: 600; }
-    .td-day { color: var(--text); }
-    .td-month { color: #a78bfa; }
-    .td-full { color: var(--accent); font-weight: 600; }
-    .td-blank { color: var(--muted); font-style: italic; font-size: 12px; }
-
-    .badge-blank { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(74,84,112,0.2); border: 1px solid var(--border2); font-size: 10px; color: var(--muted); }
-
-    .summary-row { padding: 14px 20px; border-top: 1px solid var(--border2); background: rgba(0,229,160,0.04); font-family: var(--mono); font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 8px; }
-
-    .raw-section { border-top: 1px solid var(--border); padding: 14px 20px; }
-    .raw-toggle { background: none; border: none; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; padding: 0; letter-spacing: 0.05em; }
-    .raw-toggle:hover { color: var(--text); }
-
-    .raw-box { display: none; margin-top: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 250px; overflow-y: auto; line-height: 1.7; }
-    .raw-box.open { display: block; }
-
-    footer { margin-top: 56px; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-align: center; }
-    footer span { color: var(--accent); }
-  </style>
+  #results-area::-webkit-scrollbar { width: 4px; }
+  #results-area::-webkit-scrollbar-track { background: transparent; }
+  #results-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <div class="sys-line">SYS · MW-DATE-EXTRACTOR · LLAMA-3.2-VISION · ONLINE</div>
-    <h1>MW <span>Date</span> Extractor</h1>
-    <p class="tagline">// German medical form · Datum column · OCR extraction</p>
-    <div class="h-rule"></div>
-  </header>
+<header>
+  <div class="dot"></div>
+  <h1>MW Date Extractor</h1>
+  <span>v1.6 — Groq (Llama 4 Scout) · Auto-OCR · Last Result Restored</span>
+</header>
 
-  <!-- Debug Panel -->
-  <div class="debug-panel" id="debugPanel"></div>
-
-  <!-- Upload Zone -->
-  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])"/>
-    <div class="upload-icon">
-      <svg width="24" height="24" fill="none" stroke="#00d4ff" stroke-width="1.5" viewBox="0 0 24 24">
-        <path d="M4 16l4-4 4 4m4-4l-4 4M12 12V4m8 8v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4"/>
-      </svg>
-    </div>
-    <div class="upload-title">ছবি এখানে ড্রপ করুন</div>
-    <div class="upload-sub">অথবা <span>browse করুন</span> · PNG, JPG, WEBP</div>
-  </div>
-
-  <!-- Preview -->
-  <div class="preview-wrap" id="previewWrap">
-    <div class="preview-header">
-      <span class="preview-label">// Loaded Image</span>
-      <button class="btn-remove" onclick="removeFile()">✕ Remove</button>
-    </div>
-    <img class="preview-img" id="previewImg" src="" alt="preview"/>
-  </div>
-
-  <!-- Extract Button -->
-  <button class="btn-extract" id="extractBtn" onclick="extractDates()" disabled>
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-    </svg>
-    <span>EXTRACT DATES</span>
-  </button>
-
-  <!-- Status -->
-  <div class="status" id="status">
-    <div class="spinner"></div>
-    <span id="statusText">Llama Vision বিশ্লেষণ করছে...</span>
-  </div>
-
-  <!-- Results -->
-  <div class="result-wrap" id="resultWrap">
-    <div class="result-top">
-      <div class="result-top-left">
-        <div class="dot-ok"></div>
-        <span class="result-title">Extraction Complete</span>
-      </div>
-      <button class="btn-copy" onclick="copyCSV()">CSV কপি করুন</button>
-    </div>
-
-    <table class="date-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Raw (OCR)</th>
-          <th>Day</th>
-          <th>Month</th>
-          <th>Full Date (2026)</th>
-        </tr>
-      </thead>
-      <tbody id="dateTableBody"></tbody>
-    </table>
-
-    <div class="summary-row" id="summaryRow"></div>
-
-    <div class="raw-section">
-      <button class="raw-toggle" onclick="toggleRaw()">▸ Raw AI Response দেখুন</button>
-      <div class="raw-box" id="rawBox"></div>
-    </div>
-  </div>
-
-  <footer>Powered by <span>Cloudflare AI</span> · Llama 3.2 Vision · MW Date Extractor</footer>
+<!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
+<div id="auto-banner">
+  ⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...
 </div>
 
+<main>
+  <div id="left-panel">
+    <div class="panel-header">
+      📷 Screenshot / Image
+      <span class="badge">DROP or CLICK</span>
+      <span class="badge-blue">AUTO</span>
+    </div>
+    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="placeholder">
+        <div class="icon">🖼️</div>
+        <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
+        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
+        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
+      </div>
+      <img id="preview-img" alt="Screenshot preview" />
+    </div>
+    <input type="file" id="file-input" accept="image/*">
+  </div>
+
+  <div id="right-panel">
+    <div class="panel-header">📋 Extracted Dates</div>
+
+    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GROQ KEY:</span>
+      <input id="api-key-input" type="password" placeholder="gsk_..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    </div>
+
+    <div id="action-bar">
+      <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
+      <button id="copy-btn" disabled onclick="copyAll()">📋 Copy All</button>
+      <button id="clear-btn" onclick="clearAll()">✕ Clear</button>
+    </div>
+
+    <div id="status">
+      <div class="spinner"></div>
+      <span id="status-text">Upload a screenshot to get started</span>
+    </div>
+
+    <div id="results-area">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🗓️</div>
+        <p>Dates will appear here<br>after extraction</p>
+      </div>
+    </div>
+
+    <footer>
+      <span>Powered by Groq AI (Llama 4 Scout)</span>
+      <span id="count-display">—</span>
+    </footer>
+  </div>
+</main>
+
+<div class="toast" id="toast">✓ Copied!</div>
+
 <script>
-  const WORKER_URL = 'https://mw-date-extractor.alifmondol2030.workers.dev';
+  let currentImageBase64 = null;
+  let extractedDates = [];
 
-  const MONTHS_DE = ['','Januar','Februar','März','April','Mai','Juni',
-                     'Juli','August','September','Oktober','November','Dezember'];
+  const inp = document.getElementById('api-key-input');
+  inp.value = localStorage.getItem('groq_key') || '';
 
-  let currentBase64 = null;
-  let lastRaw = '';
-  let lastDates = [];
+  function saveKey() {
+    localStorage.setItem('groq_key', inp.value.trim());
+    showToast('Key saved!');
+  }
 
-  // Drag & Drop
-  const zone = document.getElementById('uploadZone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag');
+  // ── Page Load: last result restore করো ──
+  (function restoreLastResult() {
+    try {
+      const savedDates = localStorage.getItem('mw_ocr_last_dates');
+      const savedYear  = localStorage.getItem('mw_ocr_last_year');
+      const savedTs    = localStorage.getItem('mw_ocr_last_result_ts');
+      const savedImg   = localStorage.getItem('mw_ocr_last_image');
+      const savedMime  = localStorage.getItem('mw_ocr_last_mime');
+
+      if (savedImg) {
+        // Last screenshot preview restore
+        const previewEl = document.getElementById('preview-img');
+        const dropEl    = document.getElementById('drop-zone');
+        const mimeType  = savedMime || 'image/png';
+        previewEl.src = 'data:' + mimeType + ';base64,' + savedImg;
+        dropEl.classList.add('has-image');
+        currentImageBase64 = savedImg;
+        document.getElementById('extract-btn').disabled = false;
+      }
+
+      if (savedDates) {
+        const dates = JSON.parse(savedDates);
+        const year  = savedYear || '';
+        extractedDates = dates;
+        renderDates(year, dates);
+        document.getElementById('copy-btn').disabled = dates.length === 0;
+        document.getElementById('count-display').textContent = dates.length + ' dates found';
+
+        let timeStr = '';
+        if (savedTs) {
+          const d = new Date(parseInt(savedTs));
+          timeStr = ' · ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        setStatus('done', '✓ Last result restored' + timeStr + ' — নতুন screenshot দিলে update হবে');
+      }
+    } catch(e) {
+      console.warn('[MW Extractor] restore failed:', e);
+    }
+  })();
+
+  const fileInput  = document.getElementById('file-input');
+  const dropZone   = document.getElementById('drop-zone');
+  const previewImg = document.getElementById('preview-img');
+
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background = 'rgba(0,255,136,0.06)'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.style.background = ''; });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.style.background = '';
     const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+    if (f && f.type.startsWith('image/')) loadImage(f);
   });
 
-  function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
+  document.addEventListener('paste', e => {
+    for (const item of e.clipboardData.items) {
+      if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🔥 v1.4: SessionStorage থেকে auto-load (same-tab navigate)
+  //    + postMessage fallback (পুরোনো window.open পদ্ধতির জন্য)
+  //    + localStorage এ last screenshot সেভ রাখে (view করা যায়)
+  // ═══════════════════════════════════════════════════════════════
+
+  function loadImageFromBase64(base64, mime) {
+    if (!base64) return false;
+    const mimeType = mime || 'image/png';
+    const dataUrl = 'data:' + mimeType + ';base64,' + base64;
+    previewImg.src = dataUrl;
+    dropZone.classList.add('has-image');
+    currentImageBase64 = base64;
+    document.getElementById('extract-btn').disabled = false;
+
+    // LocalStorage এ সর্বশেষ screenshot সেভ (আগেরটা replace হবে)
+    try {
+      localStorage.setItem('mw_ocr_last_image', base64);
+      localStorage.setItem('mw_ocr_last_mime', mimeType);
+      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
+      console.log('[MW Extractor] Last screenshot localStorage এ save হয়েছে');
+    } catch(e) {
+      console.warn('[MW Extractor] localStorage save failed:', e);
+    }
+
+    return true;
+  }
+
+  function showAutoBanner(msg) {
+    const banner = document.getElementById('auto-banner');
+    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
+  }
+
+  // ── Extension Content Script থেকে image receive (v1.5 — chrome.storage.local পদ্ধতি) ──
+  // extractor_content.js custom event dispatch করে, এখানে সেটা ধরি
+  window.addEventListener('mw_ocr_image_ready', function(event) {
+    try {
+      const { base64, mime } = event.detail;
+      if (!base64) return;
+
+      console.log('[MW Extractor] Extension থেকে image পেয়েছি via custom event!');
+
+      const loaded = loadImageFromBase64(base64, mime || 'image/png');
+      if (!loaded) return;
+
+      showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
+      setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+
+      setTimeout(() => { extractDates(); }, 800);
+    } catch(e) {
+      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
+    }
+  });
+
+  // ── postMessage fallback (পুরোনো window.open পদ্ধতির জন্য) ──
+  window.addEventListener('message', function(event) {
+    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
+    const base64 = event.data.base64;
+    if (!base64) return;
+
+    console.log('[MW Extractor] postMessage থেকে ছবি পেয়েছি, auto extracting...');
+
+    const loaded = loadImageFromBase64(base64, 'image/png');
+    if (!loaded) return;
+
+    showAutoBanner('⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...');
+    setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+
+    setTimeout(() => { extractDates(); }, 800);
+  });
+
+  function loadImage(file) {
     const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      currentBase64 = dataUrl.split(',')[1];
-      document.getElementById('previewImg').src = dataUrl;
-      document.getElementById('previewWrap').classList.add('show');
-      document.getElementById('uploadZone').style.display = 'none';
-      document.getElementById('extractBtn').disabled = false;
-      document.getElementById('resultWrap').classList.remove('show');
-      document.getElementById('status').className = 'status';
-      document.getElementById('debugPanel').classList.remove('show');
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      previewImg.src = dataUrl;
+      dropZone.classList.add('has-image');
+      currentImageBase64 = dataUrl.split(',')[1];
+      document.getElementById('extract-btn').disabled = false;
+      setStatus('idle', 'Image loaded — click Extract Dates');
     };
     reader.readAsDataURL(file);
   }
 
-  function removeFile() {
-    currentBase64 = null;
-    document.getElementById('previewWrap').classList.remove('show');
-    document.getElementById('uploadZone').style.display = '';
-    document.getElementById('extractBtn').disabled = true;
-    document.getElementById('fileInput').value = '';
-    document.getElementById('resultWrap').classList.remove('show');
-    document.getElementById('status').className = 'status';
-    document.getElementById('debugPanel').classList.remove('show');
-  }
-
-  // ─── ROBUST JSON PARSER ───────────────────────────────────────────
-  function extractJSON(text) {
-    if (!text) return null;
-
-    // 1) ```json ... ``` block
-    let m = text.match(/```json\s*([\s\S]*?)```/i);
-    if (m) {
-      try { return JSON.parse(m[1].trim()); } catch(e) {}
-    }
-
-    // 2) ``` ... ``` block (any)
-    m = text.match(/```\s*([\s\S]*?)```/);
-    if (m) {
-      try { return JSON.parse(m[1].trim()); } catch(e) {}
-    }
-
-    // 3) Biggest { ... } block
-    const allBlocks = [...text.matchAll(/\{[\s\S]*?\}/g)];
-    // Try longest first
-    const sorted = allBlocks.map(x => x[0]).sort((a,b) => b.length - a.length);
-    for (const block of sorted) {
-      try { return JSON.parse(block); } catch(e) {}
-    }
-
-    // 4) Greedy { ... } from first { to last }
-    const first = text.indexOf('{');
-    const last  = text.lastIndexOf('}');
-    if (first !== -1 && last > first) {
-      try { return JSON.parse(text.slice(first, last + 1)); } catch(e) {}
-    }
-
-    return null;
-  }
-
-  // ─── FALLBACK: parse plain-text lines like "1. 05.01" or "1 | 5.1.2026" ──
-  function parsePlainTextDates(text) {
-    const dates = [];
-    // Match lines that contain a date-like pattern: digits.digits optionally .digits
-    const lineRe = /(\d+)[.\s|)]+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/g;
-    let match;
-    let num = 1;
-    while ((match = lineRe.exec(text)) !== null) {
-      const rowNum = parseInt(match[1]);
-      const day    = match[2].padStart(2, '0');
-      const month  = match[3].padStart(2, '0');
-      dates.push({
-        num: isNaN(rowNum) ? num : rowNum,
-        raw: `${match[2]}.${match[3]}`,
-        day,
-        month,
-        blank: false
-      });
-      num++;
-    }
-    return dates.length ? { year: '2026', dates } : null;
-  }
-
-  // ─── MAIN EXTRACT ─────────────────────────────────────────────────
   async function extractDates() {
-    if (!currentBase64) return;
+    if (!currentImageBase64) return;
 
-    const btn = document.getElementById('extractBtn');
-    btn.disabled = true;
-    document.getElementById('resultWrap').classList.remove('show');
-    document.getElementById('debugPanel').classList.remove('show');
-    showStatus('loading', 'Llama Vision বিশ্লেষণ করছে...');
+    const KEY = localStorage.getItem('groq_key') || '';
+    if (!KEY) {
+      setStatus('error', '✗ Groq API Key নেই — উপরে GROQ KEY বক্সে দিন');
+      return;
+    }
+
+    setStatus('running', 'Groq AI-তে পাঠানো হচ্ছে...');
+    document.getElementById('extract-btn').disabled = true;
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.style.display = 'none';
+    document.getElementById('results-area').innerHTML = '';
 
     try {
-      const response = await fetch(WORKER_URL, {
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: currentBase64 })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${KEY}`
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: { url: `data:image/png;base64,${currentImageBase64}` }
+              },
+              {
+                type: 'text',
+                text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
+              }
+            ]
+          }],
+          temperature: 0,
+          max_tokens: 1000
+        })
       });
 
-      const responseText = await response.text();
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      if (!response.ok) {
-        showDebug(`❌ Worker error ${response.status}`, responseText);
-        throw new Error(`Worker ${response.status}: ${responseText.slice(0, 200)}`);
-      }
+      const rawText = data.choices?.[0]?.message?.content || '';
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
 
-      // Parse outer response
-      let data;
+      extractedDates = parsed.dates || [];
+      const validDates = extractedDates.filter(d => !d.blank);
+      renderDates(parsed.year, extractedDates);
+      setStatus('done', `✓ ${validDates.length}টি তারিখ পাওয়া গেছে${extractedDates.length - validDates.length > 0 ? ` (${extractedDates.length - validDates.length}টি blank/skip)` : ''}`);
+      document.getElementById('copy-btn').disabled = validDates.length === 0;
+      document.getElementById('count-display').textContent = `${validDates.length} dates found`;
+
+      // ── Result localStorage এ save করো (fallback) ──
       try {
-        data = JSON.parse(responseText);
-      } catch(e) {
-        showDebug('❌ Worker returned non-JSON', responseText);
-        throw new Error('Worker returned non-JSON response');
-      }
+        localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
+        localStorage.setItem('mw_ocr_last_year', parsed.year || '');
+        localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
+        console.log('[MW Extractor] Result saved to localStorage');
+      } catch(e) { console.warn('[MW Extractor] result save failed:', e); }
 
-      // Get AI content text
-      lastRaw = '';
-      if (typeof data === 'string') {
-        lastRaw = data;
-      } else if (data.content) {
-        // Standard Anthropic/CF format: content can be string or array
-        if (typeof data.content === 'string') {
-          lastRaw = data.content;
-        } else if (Array.isArray(data.content)) {
-          lastRaw = data.content.map(c => c.text || c.content || '').join('\n');
+      // ── chrome.storage.local এও save করো (FILL button এর জন্য) ──
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({
+            mw_ocr_last_dates: extractedDates,
+            mw_ocr_last_year: parsed.year || '',
+            mw_ocr_last_result_ts: Date.now()
+          }, () => {
+            console.log('[MW Extractor] Result saved to chrome.storage.local ✓');
+          });
         }
-      } else if (data.result) {
-        lastRaw = typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
-      } else if (data.response) {
-        lastRaw = data.response;
-      } else if (data.text) {
-        lastRaw = data.text;
-      } else {
-        // Fallback: stringify everything
-        lastRaw = JSON.stringify(data, null, 2);
-      }
+      } catch(e) { console.warn('[MW Extractor] chrome.storage save failed:', e); }
 
-      document.getElementById('status').className = 'status';
-
-      // Try to extract structured JSON from AI response
-      let parsed = extractJSON(lastRaw);
-
-      // If no JSON found, try plain text parsing
-      if (!parsed || !parsed.dates || parsed.dates.length === 0) {
-        const fallback = parsePlainTextDates(lastRaw);
-        if (fallback) {
-          showDebug('⚠️ JSON parse করা যায়নি — plain text থেকে dates বের করা হয়েছে', lastRaw);
-          parsed = fallback;
-        } else {
-          showDebug('⚠️ AI response থেকে কোনো date বের করা যায়নি। Raw response নিচে দেখুন:', lastRaw);
-        }
-      }
-
-      renderTable(parsed, lastRaw);
-
-    } catch(err) {
-      showStatus('error', '✗ ' + err.message);
-      showDebug('❌ Error details:', err.stack || err.message);
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  // ─── RENDER ───────────────────────────────────────────────────────
-  function renderTable(parsed, raw) {
-    const tbody = document.getElementById('dateTableBody');
-    const summaryRow = document.getElementById('summaryRow');
-    tbody.innerHTML = '';
-
-    const year  = (parsed && parsed.year)  ? parsed.year  : '2026';
-    const dates = (parsed && parsed.dates) ? parsed.dates : [];
-    lastDates = dates;
-
-    if (dates.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:13px">কোনো তারিখ পাওয়া যায়নি — Raw AI Response দেখুন নিচে</td></tr>`;
-      summaryRow.textContent = '';
-    } else {
-      const filled = dates.filter(d => !d.blank).length;
-      dates.forEach((d, i) => {
-        const tr = document.createElement('tr');
-        if (d.blank) {
-          tr.innerHTML = `
-            <td class="td-num">${d.num || i+1}</td>
-            <td colspan="4" class="td-blank"><span class="badge-blank">BLANK / X</span></td>`;
-        } else {
-          const monthIdx = parseInt(d.month);
-          const monthName = (!isNaN(monthIdx) && monthIdx >= 1 && monthIdx <= 12)
-            ? MONTHS_DE[monthIdx] : (d.month || '—');
-          const fullDate = `${d.day}.${d.month}.${year}`;
-          tr.innerHTML = `
-            <td class="td-num">${d.num || i+1}</td>
-            <td class="td-raw">${d.raw || '—'}</td>
-            <td class="td-day">${d.day || '—'}</td>
-            <td class="td-month">${monthName}</td>
-            <td class="td-full">${fullDate}</td>`;
-        }
-        tbody.appendChild(tr);
-      });
-      summaryRow.innerHTML = `✓ &nbsp;${dates.length} rows processed · ${filled} dates found · Year: ${year}`;
+    } catch (err) {
+      console.error(err);
+      setStatus('error', '✗ Error: ' + err.message);
+      document.getElementById('results-area').innerHTML = `<div class="raw-box">Error: ${err.message}</div>`;
     }
 
-    document.getElementById('rawBox').textContent = raw;
-    document.getElementById('rawBox').classList.remove('open');
-    document.getElementById('resultWrap').classList.add('show');
-    document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('extract-btn').disabled = false;
   }
 
-  // ─── HELPERS ──────────────────────────────────────────────────────
-  function showStatus(type, msg) {
-    const el = document.getElementById('status');
-    el.className = 'status ' + type;
-    document.getElementById('statusText').textContent = msg;
-    const sp = el.querySelector('.spinner');
-    if (sp) sp.style.display = type === 'loading' ? '' : 'none';
-  }
+  function renderDates(year, dates) {
+    const area = document.getElementById('results-area');
+    area.innerHTML = '';
 
-  function showDebug(title, content) {
-    const panel = document.getElementById('debugPanel');
-    panel.innerHTML = `<strong>${title}</strong><br><br>${escapeHtml(String(content).slice(0, 1000))}`;
-    panel.classList.add('show');
-  }
+    if (!dates || !dates.length) {
+      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
+      return;
+    }
 
-  function escapeHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    const validCount = dates.filter(d => !d.blank).length;
+    const blankCount = dates.filter(d => d.blank).length;
+    const blankInfo = blankCount > 0 ? ` · ${blankCount} blank/skipped` : '';
+    label.textContent = `Year: ${year || '—'} — ${validCount} valid${blankInfo}`;
+    area.appendChild(label);
 
-  function toggleRaw() {
-    const box = document.getElementById('rawBox');
-    box.classList.toggle('open');
-    document.querySelector('.raw-toggle').textContent =
-      box.classList.contains('open') ? '▾ Raw AI Response লুকান' : '▸ Raw AI Response দেখুন';
-  }
+    const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  function copyCSV() {
-    if (!lastDates.length) return;
-    const year = '2026';
-    let csv = 'Row,Raw,Day,Month,Full Date\n';
-    lastDates.forEach((d, i) => {
+    // Chronological sort: blank dates go to end, valid dates sorted by month→day
+    const sorted = [...dates].sort((a, b) => {
+      if (a.blank && b.blank) return 0;
+      if (a.blank) return 1;
+      if (b.blank) return -1;
+      const aVal = parseInt(a.month) * 100 + parseInt(a.day);
+      const bVal = parseInt(b.month) * 100 + parseInt(b.day);
+      return aVal - bVal;
+    });
+
+    sorted.forEach((d, i) => {
+      const item = document.createElement('div');
+      item.className = 'date-item';
+      item.style.animationDelay = `${i * 0.04}s`;
+
       if (d.blank) {
-        csv += `${d.num || i+1},BLANK,,,\n`;
+        // Cross-marked / blank date — show visually distinct, will NOT be filled
+        item.style.opacity = '0.45';
+        item.style.borderColor = 'var(--danger)';
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value" style="color:var(--danger);text-decoration:line-through;">✕ BLANK</div>
+          <div class="date-full" style="color:var(--danger);">skip · not filled</div>
+        `;
       } else {
-        csv += `${d.num || i+1},${d.raw},${d.day},${d.month},${d.day}.${d.month}.${year}\n`;
+        const mName = monthNames[parseInt(d.month)] || d.month;
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value">${d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`}</div>
+          <div class="date-full">${d.day} ${mName} ${year || ''}</div>
+        `;
       }
-    });
-    navigator.clipboard.writeText(csv).then(() => {
-      const btn = document.querySelector('.btn-copy');
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => btn.textContent = 'CSV কপি করুন', 2000);
-    });
+      area.appendChild(item);
+    }); // end sorted.forEach
+  }
+
+  function copyAll() {
+    if (!extractedDates.length) return;
+    const text = extractedDates.filter(d => !d.blank).map(d => d.raw || `${d.day}.${d.month}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
+  }
+
+  function clearAll() {
+    currentImageBase64 = null;
+    extractedDates = [];
+    previewImg.src = '';
+    dropZone.classList.remove('has-image');
+    fileInput.value = '';
+    document.getElementById('extract-btn').disabled = true;
+    document.getElementById('copy-btn').disabled = true;
+    document.getElementById('results-area').innerHTML = `
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🗓️</div>
+        <p>Dates will appear here<br>after extraction</p>
+      </div>`;
+    document.getElementById('count-display').textContent = '—';
+    setStatus('idle', 'Upload a screenshot to get started');
+    // Saved results clear করো
+    try {
+      localStorage.removeItem('mw_ocr_last_dates');
+      localStorage.removeItem('mw_ocr_last_year');
+      localStorage.removeItem('mw_ocr_last_result_ts');
+      localStorage.removeItem('mw_ocr_last_image');
+      localStorage.removeItem('mw_ocr_last_mime');
+    } catch(e) {}
+  }
+
+  function setStatus(type, msg) {
+    const el = document.getElementById('status');
+    el.className = type === 'running' ? 'running' : type === 'done' ? 'done' : type === 'error' ? 'error' : '';
+    document.getElementById('status-text').textContent = msg;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
   }
 </script>
 </body>
