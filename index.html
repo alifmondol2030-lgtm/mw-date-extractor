@@ -37,23 +37,15 @@
       position: relative;
     }
 
-    /* Scanline effect */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,212,255,0.012) 2px,
-        rgba(0,212,255,0.012) 4px
-      );
+      background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.012) 2px,rgba(0,212,255,0.012) 4px);
       pointer-events: none;
       z-index: 100;
     }
 
-    /* Corner glow */
     body::after {
       content: '';
       position: fixed;
@@ -63,18 +55,9 @@
       pointer-events: none;
     }
 
-    .wrap {
-      width: 100%;
-      max-width: 720px;
-      position: relative;
-      z-index: 1;
-    }
+    .wrap { width: 100%; max-width: 720px; position: relative; z-index: 1; }
 
-    /* ── HEADER ── */
-    header {
-      margin-bottom: 44px;
-      position: relative;
-    }
+    header { margin-bottom: 44px; }
 
     .sys-line {
       font-family: var(--mono);
@@ -103,7 +86,6 @@
       font-family: var(--mono);
       font-size: clamp(22px, 4.5vw, 38px);
       font-weight: 700;
-      letter-spacing: -0.01em;
       color: #fff;
       line-height: 1.1;
       margin-bottom: 8px;
@@ -111,19 +93,29 @@
 
     h1 span { color: var(--accent); }
 
-    .tagline {
-      font-size: 13px;
-      color: var(--muted);
-      font-family: var(--mono);
-      letter-spacing: 0.04em;
-    }
+    .tagline { font-size: 13px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.04em; }
 
-    /* Decorative line */
     .h-rule {
       height: 1px;
       background: linear-gradient(90deg, var(--accent), rgba(0,212,255,0.1), transparent);
       margin: 24px 0 0;
     }
+
+    /* ── DEBUG PANEL ── */
+    .debug-panel {
+      display: none;
+      border: 1px solid rgba(255,183,0,0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      background: rgba(255,183,0,0.05);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--warn);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .debug-panel.show { display: block; }
+    .debug-panel strong { color: #fff; }
 
     /* ── UPLOAD ZONE ── */
     .upload-zone {
@@ -148,13 +140,8 @@
       transition: opacity 0.3s;
     }
 
-    .upload-zone:hover, .upload-zone.drag {
-      border-color: var(--accent);
-      background: rgba(0,212,255,0.03);
-    }
-
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(0,212,255,0.03); }
     .upload-zone:hover::before, .upload-zone.drag::before { opacity: 1; }
-
     .upload-zone input { display: none; }
 
     .upload-icon {
@@ -170,39 +157,15 @@
     }
 
     .upload-zone:hover .upload-icon { border-color: var(--accent); }
-
     .upload-icon svg { opacity: 0.6; transition: opacity 0.2s; }
     .upload-zone:hover .upload-icon svg { opacity: 1; }
 
-    .upload-title {
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .upload-sub {
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-    }
-
-    .upload-sub span {
-      color: var(--accent);
-      cursor: pointer;
-    }
+    .upload-title { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .upload-sub { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+    .upload-sub span { color: var(--accent); cursor: pointer; }
 
     /* Preview */
-    .preview-wrap {
-      display: none;
-      margin-bottom: 20px;
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--surface);
-    }
-
+    .preview-wrap { display: none; margin-bottom: 20px; border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; background: var(--surface); }
     .preview-wrap.show { display: block; }
 
     .preview-header {
@@ -214,36 +177,12 @@
       background: var(--surface2);
     }
 
-    .preview-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
+    .preview-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
 
-    .btn-remove {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 4px;
-      transition: color 0.2s;
-    }
-
+    .btn-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 4px; transition: color 0.2s; }
     .btn-remove:hover { color: var(--pink); }
 
-    .preview-img {
-      width: 100%;
-      max-height: 280px;
-      object-fit: contain;
-      display: block;
-      padding: 16px;
-      background: #000;
-    }
+    .preview-img { width: 100%; max-height: 280px; object-fit: contain; display: block; padding: 16px; background: #000; }
 
     /* ── BUTTON ── */
     .btn-extract {
@@ -268,235 +207,58 @@
       overflow: hidden;
     }
 
-    .btn-extract::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--accent);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .btn-extract:hover:not(:disabled) {
-      color: var(--bg);
-      box-shadow: 0 0 24px rgba(0,212,255,0.3);
-    }
-
+    .btn-extract::before { content: ''; position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+    .btn-extract:hover:not(:disabled) { color: var(--bg); box-shadow: 0 0 24px rgba(0,212,255,0.3); }
     .btn-extract:hover:not(:disabled)::before { opacity: 1; }
-
     .btn-extract span, .btn-extract svg { position: relative; z-index: 1; }
-
-    .btn-extract:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    .btn-extract:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── STATUS ── */
-    .status {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 12px;
-      margin-bottom: 20px;
-      border: 1px solid;
-    }
+    .status { display: none; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 8px; font-family: var(--mono); font-size: 12px; margin-bottom: 20px; border: 1px solid; }
+    .status.loading { display: flex; border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.05); color: var(--accent); }
+    .status.error { display: flex; border-color: rgba(255,61,127,0.25); background: rgba(255,61,127,0.06); color: var(--pink); }
 
-    .status.loading {
-      display: flex;
-      border-color: rgba(0,212,255,0.2);
-      background: rgba(0,212,255,0.05);
-      color: var(--accent);
-    }
-
-    .status.error {
-      display: flex;
-      border-color: rgba(255,61,127,0.25);
-      background: rgba(255,61,127,0.06);
-      color: var(--pink);
-    }
-
-    .spinner {
-      width: 14px; height: 14px;
-      border: 2px solid rgba(0,212,255,0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      flex-shrink: 0;
-    }
-
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(0,212,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── RESULTS TABLE ── */
-    .result-wrap {
-      display: none;
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      overflow: hidden;
-      background: var(--surface);
-    }
-
+    /* ── RESULTS ── */
+    .result-wrap { display: none; border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; background: var(--surface); }
     .result-wrap.show { display: block; }
 
-    .result-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      background: var(--surface2);
-      border-bottom: 1px solid var(--border);
-    }
+    .result-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .result-top-left { display: flex; align-items: center; gap: 10px; }
+    .dot-ok { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .result-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--success); }
 
-    .result-top-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .btn-copy { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 5px 12px; cursor: pointer; transition: all 0.2s; }
+    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
 
-    .dot-ok {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-    }
-
-    .result-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--success);
-    }
-
-    .btn-copy {
-      background: none;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 5px 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-copy:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* Table */
-    .date-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--mono);
-    }
-
-    .date-table th {
-      padding: 10px 20px;
-      text-align: left;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      background: rgba(0,0,0,0.2);
-    }
-
-    .date-table td {
-      padding: 12px 20px;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
+    .date-table { width: 100%; border-collapse: collapse; font-family: var(--mono); }
+    .date-table th { padding: 10px 20px; text-align: left; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .date-table td { padding: 12px 20px; font-size: 13px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
     .date-table tr:last-child td { border-bottom: none; }
     .date-table tr:hover td { background: rgba(0,212,255,0.03); }
 
     .td-num { color: var(--muted); font-size: 11px; width: 50px; }
     .td-raw { color: var(--warn); font-weight: 600; }
     .td-day { color: var(--text); }
-    .td-month { color: var(--text); }
+    .td-month { color: #a78bfa; }
     .td-full { color: var(--accent); font-weight: 600; }
     .td-blank { color: var(--muted); font-style: italic; font-size: 12px; }
 
-    .badge-blank {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: rgba(74,84,112,0.2);
-      border: 1px solid var(--border2);
-      font-size: 10px;
-      color: var(--muted);
-    }
+    .badge-blank { display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(74,84,112,0.2); border: 1px solid var(--border2); font-size: 10px; color: var(--muted); }
 
-    /* Summary row */
-    .summary-row {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border2);
-      background: rgba(0,229,160,0.04);
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .summary-row { padding: 14px 20px; border-top: 1px solid var(--border2); background: rgba(0,229,160,0.04); font-family: var(--mono); font-size: 11px; color: var(--success); display: flex; align-items: center; gap: 8px; }
 
-    /* Raw toggle */
-    .raw-section {
-      border-top: 1px solid var(--border);
-      padding: 14px 20px;
-    }
-
-    .raw-toggle {
-      background: none;
-      border: none;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 0;
-      letter-spacing: 0.05em;
-    }
-
+    .raw-section { border-top: 1px solid var(--border); padding: 14px 20px; }
+    .raw-toggle { background: none; border: none; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; padding: 0; letter-spacing: 0.05em; }
     .raw-toggle:hover { color: var(--text); }
 
-    .raw-box {
-      display: none;
-      margin-top: 12px;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      white-space: pre-wrap;
-      word-break: break-word;
-      max-height: 250px;
-      overflow-y: auto;
-      line-height: 1.7;
-    }
-
+    .raw-box { display: none; margin-top: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: pre-wrap; word-break: break-word; max-height: 250px; overflow-y: auto; line-height: 1.7; }
     .raw-box.open { display: block; }
 
-    /* Footer */
-    footer {
-      margin-top: 56px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-align: center;
-    }
-
+    footer { margin-top: 56px; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-align: center; }
     footer span { color: var(--accent); }
-
-    /* Month names */
-    .month-de { color: #a78bfa; }
   </style>
 </head>
 <body>
@@ -508,6 +270,9 @@
     <p class="tagline">// German medical form · Datum column · OCR extraction</p>
     <div class="h-rule"></div>
   </header>
+
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel"></div>
 
   <!-- Upload Zone -->
   <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
@@ -605,13 +370,13 @@
     reader.onload = e => {
       const dataUrl = e.target.result;
       currentBase64 = dataUrl.split(',')[1];
-
       document.getElementById('previewImg').src = dataUrl;
       document.getElementById('previewWrap').classList.add('show');
       document.getElementById('uploadZone').style.display = 'none';
       document.getElementById('extractBtn').disabled = false;
       document.getElementById('resultWrap').classList.remove('show');
       document.getElementById('status').className = 'status';
+      document.getElementById('debugPanel').classList.remove('show');
     };
     reader.readAsDataURL(file);
   }
@@ -624,14 +389,74 @@
     document.getElementById('fileInput').value = '';
     document.getElementById('resultWrap').classList.remove('show');
     document.getElementById('status').className = 'status';
+    document.getElementById('debugPanel').classList.remove('show');
   }
 
+  // ─── ROBUST JSON PARSER ───────────────────────────────────────────
+  function extractJSON(text) {
+    if (!text) return null;
+
+    // 1) ```json ... ``` block
+    let m = text.match(/```json\s*([\s\S]*?)```/i);
+    if (m) {
+      try { return JSON.parse(m[1].trim()); } catch(e) {}
+    }
+
+    // 2) ``` ... ``` block (any)
+    m = text.match(/```\s*([\s\S]*?)```/);
+    if (m) {
+      try { return JSON.parse(m[1].trim()); } catch(e) {}
+    }
+
+    // 3) Biggest { ... } block
+    const allBlocks = [...text.matchAll(/\{[\s\S]*?\}/g)];
+    // Try longest first
+    const sorted = allBlocks.map(x => x[0]).sort((a,b) => b.length - a.length);
+    for (const block of sorted) {
+      try { return JSON.parse(block); } catch(e) {}
+    }
+
+    // 4) Greedy { ... } from first { to last }
+    const first = text.indexOf('{');
+    const last  = text.lastIndexOf('}');
+    if (first !== -1 && last > first) {
+      try { return JSON.parse(text.slice(first, last + 1)); } catch(e) {}
+    }
+
+    return null;
+  }
+
+  // ─── FALLBACK: parse plain-text lines like "1. 05.01" or "1 | 5.1.2026" ──
+  function parsePlainTextDates(text) {
+    const dates = [];
+    // Match lines that contain a date-like pattern: digits.digits optionally .digits
+    const lineRe = /(\d+)[.\s|)]+(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?/g;
+    let match;
+    let num = 1;
+    while ((match = lineRe.exec(text)) !== null) {
+      const rowNum = parseInt(match[1]);
+      const day    = match[2].padStart(2, '0');
+      const month  = match[3].padStart(2, '0');
+      dates.push({
+        num: isNaN(rowNum) ? num : rowNum,
+        raw: `${match[2]}.${match[3]}`,
+        day,
+        month,
+        blank: false
+      });
+      num++;
+    }
+    return dates.length ? { year: '2026', dates } : null;
+  }
+
+  // ─── MAIN EXTRACT ─────────────────────────────────────────────────
   async function extractDates() {
     if (!currentBase64) return;
 
     const btn = document.getElementById('extractBtn');
     btn.disabled = true;
     document.getElementById('resultWrap').classList.remove('show');
+    document.getElementById('debugPanel').classList.remove('show');
     showStatus('loading', 'Llama Vision বিশ্লেষণ করছে...');
 
     try {
@@ -641,67 +466,105 @@
         body: JSON.stringify({ image: currentBase64 })
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const t = await response.text();
-        throw new Error(`Worker ${response.status}: ${t}`);
+        showDebug(`❌ Worker error ${response.status}`, responseText);
+        throw new Error(`Worker ${response.status}: ${responseText.slice(0, 200)}`);
       }
 
-      const data = await response.json();
-      lastRaw = data.content || JSON.stringify(data);
-
-      // Parse JSON from AI response
-      let parsed = null;
+      // Parse outer response
+      let data;
       try {
-        const m = lastRaw.match(/\{[\s\S]*\}/);
-        if (m) parsed = JSON.parse(m[0]);
-      } catch(e) {}
+        data = JSON.parse(responseText);
+      } catch(e) {
+        showDebug('❌ Worker returned non-JSON', responseText);
+        throw new Error('Worker returned non-JSON response');
+      }
+
+      // Get AI content text
+      lastRaw = '';
+      if (typeof data === 'string') {
+        lastRaw = data;
+      } else if (data.content) {
+        // Standard Anthropic/CF format: content can be string or array
+        if (typeof data.content === 'string') {
+          lastRaw = data.content;
+        } else if (Array.isArray(data.content)) {
+          lastRaw = data.content.map(c => c.text || c.content || '').join('\n');
+        }
+      } else if (data.result) {
+        lastRaw = typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+      } else if (data.response) {
+        lastRaw = data.response;
+      } else if (data.text) {
+        lastRaw = data.text;
+      } else {
+        // Fallback: stringify everything
+        lastRaw = JSON.stringify(data, null, 2);
+      }
 
       document.getElementById('status').className = 'status';
+
+      // Try to extract structured JSON from AI response
+      let parsed = extractJSON(lastRaw);
+
+      // If no JSON found, try plain text parsing
+      if (!parsed || !parsed.dates || parsed.dates.length === 0) {
+        const fallback = parsePlainTextDates(lastRaw);
+        if (fallback) {
+          showDebug('⚠️ JSON parse করা যায়নি — plain text থেকে dates বের করা হয়েছে', lastRaw);
+          parsed = fallback;
+        } else {
+          showDebug('⚠️ AI response থেকে কোনো date বের করা যায়নি। Raw response নিচে দেখুন:', lastRaw);
+        }
+      }
+
       renderTable(parsed, lastRaw);
 
     } catch(err) {
       showStatus('error', '✗ ' + err.message);
+      showDebug('❌ Error details:', err.stack || err.message);
     } finally {
       btn.disabled = false;
     }
   }
 
+  // ─── RENDER ───────────────────────────────────────────────────────
   function renderTable(parsed, raw) {
     const tbody = document.getElementById('dateTableBody');
     const summaryRow = document.getElementById('summaryRow');
     tbody.innerHTML = '';
 
-    const year = (parsed && parsed.year) ? parsed.year : '2026';
+    const year  = (parsed && parsed.year)  ? parsed.year  : '2026';
     const dates = (parsed && parsed.dates) ? parsed.dates : [];
     lastDates = dates;
 
     if (dates.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:13px">কোনো তারিখ পাওয়া যায়নি</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:13px">কোনো তারিখ পাওয়া যায়নি — Raw AI Response দেখুন নিচে</td></tr>`;
       summaryRow.textContent = '';
     } else {
       const filled = dates.filter(d => !d.blank).length;
-
       dates.forEach((d, i) => {
         const tr = document.createElement('tr');
-        tr.style.animationDelay = (i * 40) + 'ms';
-
         if (d.blank) {
           tr.innerHTML = `
             <td class="td-num">${d.num || i+1}</td>
             <td colspan="4" class="td-blank"><span class="badge-blank">BLANK / X</span></td>`;
         } else {
-          const monthName = MONTHS_DE[parseInt(d.month)] || d.month;
+          const monthIdx = parseInt(d.month);
+          const monthName = (!isNaN(monthIdx) && monthIdx >= 1 && monthIdx <= 12)
+            ? MONTHS_DE[monthIdx] : (d.month || '—');
           const fullDate = `${d.day}.${d.month}.${year}`;
           tr.innerHTML = `
             <td class="td-num">${d.num || i+1}</td>
             <td class="td-raw">${d.raw || '—'}</td>
             <td class="td-day">${d.day || '—'}</td>
-            <td class="td-month month-de">${monthName}</td>
+            <td class="td-month">${monthName}</td>
             <td class="td-full">${fullDate}</td>`;
         }
         tbody.appendChild(tr);
       });
-
       summaryRow.innerHTML = `✓ &nbsp;${dates.length} rows processed · ${filled} dates found · Year: ${year}`;
     }
 
@@ -711,14 +574,23 @@
     document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // ─── HELPERS ──────────────────────────────────────────────────────
   function showStatus(type, msg) {
     const el = document.getElementById('status');
     el.className = 'status ' + type;
     document.getElementById('statusText').textContent = msg;
-    if (type !== 'loading') {
-      const sp = el.querySelector('.spinner');
-      if (sp) sp.style.display = 'none';
-    }
+    const sp = el.querySelector('.spinner');
+    if (sp) sp.style.display = type === 'loading' ? '' : 'none';
+  }
+
+  function showDebug(title, content) {
+    const panel = document.getElementById('debugPanel');
+    panel.innerHTML = `<strong>${title}</strong><br><br>${escapeHtml(String(content).slice(0, 1000))}`;
+    panel.classList.add('show');
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function toggleRaw() {
