@@ -216,7 +216,7 @@
     white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
   }
 
-  /* Key bar — ৩টা key slot */
+  /* Key bar */
   #key-bar {
     padding: 10px 16px;
     border-bottom: 1px solid var(--border);
@@ -278,7 +278,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.0 — OpenRouter (Llama 4 Maverick) · 3-Key Rotation · Auto-OCR</span>
+  <span>v2.1 — OpenRouter (Qwen2.5 VL 72B) · 3-Key Rotation · Auto-OCR</span>
 </header>
 
 <div id="auto-banner">
@@ -346,7 +346,7 @@
     </div>
 
     <footer>
-      <span>Powered by OpenRouter (Llama 4 Maverick Free)</span>
+      <span>Powered by OpenRouter (Qwen2.5 VL 72B Instruct Free)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -357,9 +357,8 @@
 <script>
   let currentImageBase64 = null;
   let extractedDates = [];
-  let currentKeyIndex = 0; // কোন key এখন active
+  let currentKeyIndex = 0;
 
-  // ── Keys load করো ──
   function loadKeys() {
     document.getElementById('key1').value = localStorage.getItem('or_key1') || '';
     document.getElementById('key2').value = localStorage.getItem('or_key2') || '';
@@ -388,7 +387,6 @@
     const keys = getKeys();
     const line = document.getElementById('key-status-line');
     line.textContent = `${keys.length} key(s) loaded · Active: KEY ${currentKeyIndex + 1}`;
-    // Active key highlight
     ['key1','key2','key3'].forEach((id, i) => {
       const el = document.getElementById(id);
       el.classList.toggle('key-active', i === currentKeyIndex && el.value.trim().length > 0);
@@ -513,7 +511,7 @@
     reader.readAsDataURL(file);
   }
 
-  // ── OpenRouter API call — key rotation সহ ──
+  // ── OpenRouter API call — Qwen2.5 VL 72B ──
   async function callOpenRouter(base64, keyIndex) {
     const keys = getKeys();
     if (keys.length === 0) throw new Error('কোনো API Key নেই! উপরে KEY বক্সে দিন।');
@@ -529,8 +527,7 @@
         'X-Title': 'MW Date Extractor'
       },
       body: JSON.stringify({
-        // Llama 4 Maverick — free vision model, best for image+text
-        model: 'meta-llama/llama-4-maverick:free',
+        model: 'qwen/qwen2.5-vl-72b-instruct:free',
         messages: [{
           role: 'user',
           content: [
@@ -571,7 +568,6 @@
 
     let lastError = null;
 
-    // ── Key rotation: সব key try করো ──
     for (let attempt = 0; attempt < keys.length; attempt++) {
       const keyIdx = (currentKeyIndex + attempt) % keys.length;
       try {
@@ -591,11 +587,9 @@
         document.getElementById('copy-btn').disabled = validDates.length === 0;
         document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-        // ── Next request এ পরের key ব্যবহার করো (round-robin) ──
         currentKeyIndex = (keyIdx + 1) % keys.length;
         updateKeyStatus();
 
-        // Save results
         try {
           localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
           localStorage.setItem('mw_ocr_last_year', parsed.year || '');
@@ -613,13 +607,12 @@
         } catch(e) {}
 
         document.getElementById('extract-btn').disabled = false;
-        return; // সফল — loop থেকে বের হও
+        return;
 
       } catch(err) {
         lastError = err;
         console.warn(`[MW] KEY ${keyIdx + 1} failed:`, err.message);
 
-        // Rate limit বা auth error হলে পরের key try করো
         if (attempt < keys.length - 1) {
           setStatus('running', `KEY ${keyIdx + 1} limit — KEY ${((keyIdx + 1) % keys.length) + 1} দিয়ে চেষ্টা করছি...`);
           await new Promise(r => setTimeout(r, 800));
@@ -627,7 +620,6 @@
       }
     }
 
-    // সব key fail হলে
     setStatus('error', '✗ সব key fail হয়েছে: ' + (lastError?.message || 'Unknown error'));
     document.getElementById('results-area').innerHTML = `<div class="raw-box">Error: ${lastError?.message}\n\nসব key দিয়ে চেষ্টা হয়েছে। limit শেষ হলে কিছুক্ষণ পর আবার try করুন।</div>`;
     document.getElementById('extract-btn').disabled = false;
