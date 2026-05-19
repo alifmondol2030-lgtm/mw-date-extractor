@@ -1,374 +1,482 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="de">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MW Date Extractor</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Tiro+Bangla&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --border: #2a2a3a;
-      --accent: #c026d3;
-      --accent2: #7c3aed;
-      --text: #e8e8f0;
-      --muted: #6b6b80;
-      --success: #10b981;
-      --error: #ef4444;
-      --mono: 'JetBrains Mono', monospace;
-      --serif: 'Tiro Bangla', serif;
+      --bg: #07090f;
+      --surface: #0e1017;
+      --surface2: #161923;
+      --border: #1e2330;
+      --border2: #2a3045;
+      --accent: #00d4ff;
+      --accent2: #0099bb;
+      --pink: #ff3d7f;
+      --text: #dde4f0;
+      --muted: #4a5470;
+      --success: #00e5a0;
+      --warn: #ffb700;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: var(--mono);
+      font-family: var(--sans);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 16px 80px;
+      padding: 48px 16px 100px;
       position: relative;
-      overflow-x: hidden;
     }
 
-    /* Grid background */
+    /* Scanline effect */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image:
-        linear-gradient(rgba(192,38,211,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(192,38,211,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,212,255,0.012) 2px,
+        rgba(0,212,255,0.012) 4px
+      );
       pointer-events: none;
-      z-index: 0;
+      z-index: 100;
     }
 
-    /* Glow orbs */
+    /* Corner glow */
     body::after {
       content: '';
       position: fixed;
-      top: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(192,38,211,0.12) 0%, transparent 70%);
+      top: 0; left: 0;
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse at top left, rgba(0,212,255,0.06), transparent 70%);
       pointer-events: none;
-      z-index: 0;
     }
 
-    .container {
+    .wrap {
       width: 100%;
-      max-width: 760px;
+      max-width: 720px;
       position: relative;
       z-index: 1;
     }
 
-    /* Header */
+    /* ── HEADER ── */
     header {
-      text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 44px;
+      position: relative;
     }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(192,38,211,0.1);
-      border: 1px solid rgba(192,38,211,0.3);
-      border-radius: 999px;
-      padding: 4px 14px;
+    .sys-line {
+      font-family: var(--mono);
       font-size: 11px;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .badge::before {
+    .sys-line::before {
       content: '';
+      display: inline-block;
       width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--accent);
-      animation: pulse 2s infinite;
+      box-shadow: 0 0 10px var(--accent);
+      animation: blink 2s infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
     h1 {
-      font-size: clamp(26px, 5vw, 42px);
+      font-family: var(--mono);
+      font-size: clamp(22px, 4.5vw, 38px);
       font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #fff 30%, var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1.2;
-      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 8px;
     }
 
-    .subtitle {
-      font-family: var(--serif);
+    h1 span { color: var(--accent); }
+
+    .tagline {
+      font-size: 13px;
       color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
     }
 
-    /* Card */
-    .card {
+    /* Decorative line */
+    .h-rule {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent), rgba(0,212,255,0.1), transparent);
+      margin: 24px 0 0;
+    }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 1px dashed var(--border2);
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .upload-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.03), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .upload-zone:hover, .upload-zone.drag {
+      border-color: var(--accent);
+      background: rgba(0,212,255,0.03);
+    }
+
+    .upload-zone:hover::before, .upload-zone.drag::before { opacity: 1; }
+
+    .upload-zone input { display: none; }
+
+    .upload-icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      transition: border-color 0.2s;
+    }
+
+    .upload-zone:hover .upload-icon { border-color: var(--accent); }
+
+    .upload-icon svg { opacity: 0.6; transition: opacity 0.2s; }
+    .upload-zone:hover .upload-icon svg { opacity: 1; }
+
+    .upload-title {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .upload-sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .upload-sub span {
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Preview */
+    .preview-wrap {
+      display: none;
+      margin-bottom: 20px;
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .preview-wrap.show { display: block; }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .preview-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .btn-remove:hover { color: var(--pink); }
+
+    .preview-img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      display: block;
+      padding: 16px;
+      background: #000;
+    }
+
+    /* ── BUTTON ── */
+    .btn-extract {
+      width: 100%;
+      padding: 15px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       margin-bottom: 20px;
       position: relative;
       overflow: hidden;
     }
 
-    .card::before {
+    .btn-extract::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      inset: 0;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
     }
 
-    .card-label {
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
+    .btn-extract:hover:not(:disabled) {
+      color: var(--bg);
+      box-shadow: 0 0 24px rgba(0,212,255,0.3);
     }
 
-    textarea {
-      width: 100%;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      padding: 14px;
-      resize: vertical;
-      min-height: 160px;
-      transition: border-color 0.2s;
-      outline: none;
-      line-height: 1.6;
-    }
+    .btn-extract:hover:not(:disabled)::before { opacity: 1; }
 
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(192,38,211,0.1);
-    }
+    .btn-extract span, .btn-extract svg { position: relative; z-index: 1; }
 
-    textarea::placeholder { color: var(--muted); }
-
-    /* Controls */
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      letter-spacing: 0.02em;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(192,38,211,0.3);
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(192,38,211,0.45);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.5;
+    .btn-extract:disabled {
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
-    .btn-secondary {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      color: var(--text);
-      border-color: var(--accent);
-    }
-
-    /* Status */
+    /* ── STATUS ── */
     .status {
       display: none;
       align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
+      gap: 12px;
+      padding: 14px 18px;
       border-radius: 8px;
-      font-size: 13px;
-      margin-top: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-bottom: 20px;
       border: 1px solid;
     }
 
     .status.loading {
       display: flex;
-      background: rgba(124,58,237,0.1);
-      border-color: rgba(124,58,237,0.3);
-      color: #a78bfa;
-    }
-
-    .status.success {
-      display: flex;
-      background: rgba(16,185,129,0.08);
-      border-color: rgba(16,185,129,0.25);
-      color: var(--success);
+      border-color: rgba(0,212,255,0.2);
+      background: rgba(0,212,255,0.05);
+      color: var(--accent);
     }
 
     .status.error {
       display: flex;
-      background: rgba(239,68,68,0.08);
-      border-color: rgba(239,68,68,0.25);
-      color: var(--error);
+      border-color: rgba(255,61,127,0.25);
+      background: rgba(255,61,127,0.06);
+      color: var(--pink);
     }
 
     .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid rgba(167,139,250,0.3);
-      border-top-color: #a78bfa;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,212,255,0.2);
+      border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin 0.6s linear infinite;
       flex-shrink: 0;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Result */
-    .result-card {
+    /* ── RESULTS TABLE ── */
+    .result-wrap {
       display: none;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      border: 1px solid var(--border2);
+      border-radius: 12px;
       overflow: hidden;
+      background: var(--surface);
     }
 
-    .result-card.visible { display: block; }
+    .result-wrap.show { display: block; }
 
-    .result-header {
+    .result-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 24px;
+      padding: 14px 20px;
+      background: var(--surface2);
       border-bottom: 1px solid var(--border);
-      background: rgba(0,0,0,0.2);
+    }
+
+    .result-top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot-ok {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
     }
 
     .result-title {
+      font-family: var(--mono);
       font-size: 11px;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--success);
     }
 
-    .result-body {
-      padding: 24px;
+    .btn-copy {
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    /* Date grid */
-    .date-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .date-item {
-      background: rgba(0,0,0,0.25);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      transition: border-color 0.2s, transform 0.2s;
-      animation: fadeIn 0.3s ease both;
-    }
-
-    .date-item:hover {
+    .btn-copy:hover {
       border-color: var(--accent);
-      transform: translateY(-2px);
+      color: var(--accent);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* Table */
+    .date-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
     }
 
-    .date-label {
+    .date-table th {
+      padding: 10px 20px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .date-table td {
+      padding: 12px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .date-table tr:last-child td { border-bottom: none; }
+    .date-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+    .td-num { color: var(--muted); font-size: 11px; width: 50px; }
+    .td-raw { color: var(--warn); font-weight: 600; }
+    .td-day { color: var(--text); }
+    .td-month { color: var(--text); }
+    .td-full { color: var(--accent); font-weight: 600; }
+    .td-blank { color: var(--muted); font-style: italic; font-size: 12px; }
+
+    .badge-blank {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(74,84,112,0.2);
+      border: 1px solid var(--border2);
       font-size: 10px;
       color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
     }
 
-    .date-value {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .date-value.accent { color: var(--accent); }
-    .date-value.success { color: var(--success); }
-
-    /* Raw response */
-    .raw-toggle {
+    /* Summary row */
+    .summary-row {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border2);
+      background: rgba(0,229,160,0.04);
+      font-family: var(--mono);
       font-size: 11px;
-      color: var(--muted);
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Raw toggle */
+    .raw-section {
+      border-top: 1px solid var(--border);
+      padding: 14px 20px;
+    }
+
+    .raw-toggle {
       background: none;
       border: none;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
       cursor: pointer;
       padding: 0;
-      font-family: var(--mono);
       letter-spacing: 0.05em;
-      text-decoration: underline;
-      margin-top: 8px;
     }
 
     .raw-toggle:hover { color: var(--text); }
 
     .raw-box {
       display: none;
-      margin-top: 16px;
+      margin-top: 12px;
       background: rgba(0,0,0,0.4);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 14px;
-      font-size: 12px;
+      font-family: var(--mono);
+      font-size: 11px;
       color: var(--muted);
       white-space: pre-wrap;
       word-break: break-word;
-      max-height: 300px;
+      max-height: 250px;
       overflow-y: auto;
       line-height: 1.7;
     }
@@ -377,185 +485,230 @@
 
     /* Footer */
     footer {
-      margin-top: 48px;
-      text-align: center;
-      font-size: 11px;
+      margin-top: 56px;
+      font-family: var(--mono);
+      font-size: 10px;
       color: var(--muted);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
+      text-align: center;
     }
 
     footer span { color: var(--accent); }
+
+    /* Month names */
+    .month-de { color: #a78bfa; }
   </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
+
   <header>
-    <div class="badge">Cloudflare Worker Powered</div>
-    <h1>MW Date Extractor</h1>
-    <p class="subtitle">টেক্সট থেকে তারিখ বের করে বাংলায় রূপান্তর করুন</p>
+    <div class="sys-line">SYS · MW-DATE-EXTRACTOR · LLAMA-3.2-VISION · ONLINE</div>
+    <h1>MW <span>Date</span> Extractor</h1>
+    <p class="tagline">// German medical form · Datum column · OCR extraction</p>
+    <div class="h-rule"></div>
   </header>
 
-  <!-- Input Card -->
-  <div class="card">
-    <div class="card-label">// Input Text</div>
-    <textarea id="inputText" placeholder="এখানে টেক্সট পেস্ট করুন যেখানে তারিখ আছে...&#10;&#10;উদাহরণ: The event was held on 15 March 2024 and the next meeting is on 2025-06-30."></textarea>
-
-    <div class="controls">
-      <button class="btn btn-primary" id="extractBtn" onclick="extractDates()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        তারিখ বের করুন
-      </button>
-      <button class="btn btn-secondary" onclick="clearAll()">পরিষ্কার করুন</button>
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])"/>
+    <div class="upload-icon">
+      <svg width="24" height="24" fill="none" stroke="#00d4ff" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M4 16l4-4 4 4m4-4l-4 4M12 12V4m8 8v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4"/>
+      </svg>
     </div>
-
-    <div class="status" id="status">
-      <div class="spinner"></div>
-      <span id="statusText">AI বিশ্লেষণ করছে...</span>
-    </div>
+    <div class="upload-title">ছবি এখানে ড্রপ করুন</div>
+    <div class="upload-sub">অথবা <span>browse করুন</span> · PNG, JPG, WEBP</div>
   </div>
 
-  <!-- Result Card -->
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <span class="result-title">✓ তারিখ পাওয়া গেছে</span>
-      <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="copyResult()">কপি করুন</button>
+  <!-- Preview -->
+  <div class="preview-wrap" id="previewWrap">
+    <div class="preview-header">
+      <span class="preview-label">// Loaded Image</span>
+      <button class="btn-remove" onclick="removeFile()">✕ Remove</button>
     </div>
-    <div class="result-body">
-      <div class="date-grid" id="dateGrid"></div>
-      <button class="raw-toggle" onclick="toggleRaw()">সম্পূর্ণ AI রেসপন্স দেখুন ▾</button>
+    <img class="preview-img" id="previewImg" src="" alt="preview"/>
+  </div>
+
+  <!-- Extract Button -->
+  <button class="btn-extract" id="extractBtn" onclick="extractDates()" disabled>
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <span>EXTRACT DATES</span>
+  </button>
+
+  <!-- Status -->
+  <div class="status" id="status">
+    <div class="spinner"></div>
+    <span id="statusText">Llama Vision বিশ্লেষণ করছে...</span>
+  </div>
+
+  <!-- Results -->
+  <div class="result-wrap" id="resultWrap">
+    <div class="result-top">
+      <div class="result-top-left">
+        <div class="dot-ok"></div>
+        <span class="result-title">Extraction Complete</span>
+      </div>
+      <button class="btn-copy" onclick="copyCSV()">CSV কপি করুন</button>
+    </div>
+
+    <table class="date-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Raw (OCR)</th>
+          <th>Day</th>
+          <th>Month</th>
+          <th>Full Date (2026)</th>
+        </tr>
+      </thead>
+      <tbody id="dateTableBody"></tbody>
+    </table>
+
+    <div class="summary-row" id="summaryRow"></div>
+
+    <div class="raw-section">
+      <button class="raw-toggle" onclick="toggleRaw()">▸ Raw AI Response দেখুন</button>
       <div class="raw-box" id="rawBox"></div>
     </div>
   </div>
 
-  <footer>Powered by <span>Cloudflare Workers</span> · Claude AI · MW Date Extractor</footer>
+  <footer>Powered by <span>Cloudflare AI</span> · Llama 3.2 Vision · MW Date Extractor</footer>
 </div>
 
 <script>
   const WORKER_URL = 'https://mw-date-extractor.alifmondol2030.workers.dev';
 
+  const MONTHS_DE = ['','Januar','Februar','März','April','Mai','Juni',
+                     'Juli','August','September','Oktober','November','Dezember'];
+
+  let currentBase64 = null;
+  let lastRaw = '';
+  let lastDates = [];
+
+  // Drag & Drop
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+
+  function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      currentBase64 = dataUrl.split(',')[1];
+
+      document.getElementById('previewImg').src = dataUrl;
+      document.getElementById('previewWrap').classList.add('show');
+      document.getElementById('uploadZone').style.display = 'none';
+      document.getElementById('extractBtn').disabled = false;
+      document.getElementById('resultWrap').classList.remove('show');
+      document.getElementById('status').className = 'status';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeFile() {
+    currentBase64 = null;
+    document.getElementById('previewWrap').classList.remove('show');
+    document.getElementById('uploadZone').style.display = '';
+    document.getElementById('extractBtn').disabled = true;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('resultWrap').classList.remove('show');
+    document.getElementById('status').className = 'status';
+  }
+
   async function extractDates() {
-    const text = document.getElementById('inputText').value.trim();
-    if (!text) { showStatus('error', '⚠ কোনো টেক্সট নেই। আগে টেক্সট লিখুন।'); return; }
+    if (!currentBase64) return;
 
     const btn = document.getElementById('extractBtn');
     btn.disabled = true;
-    document.getElementById('resultCard').classList.remove('visible');
-    showStatus('loading', 'AI বিশ্লেষণ করছে...');
-
-    const prompt = `Extract all dates from the following text. For each date found:
-1. Write the original date as it appears
-2. Convert it to Bengali format (বাংলা তারিখ: DD মাসের নাম YYYY)
-3. Also provide ISO format (YYYY-MM-DD)
-
-Respond in this exact JSON format:
-{
-  "found": true/false,
-  "count": number,
-  "dates": [
-    {
-      "original": "original date text",
-      "bengali": "বাংলা ফরম্যাট",
-      "iso": "YYYY-MM-DD",
-      "context": "short surrounding context"
-    }
-  ],
-  "summary": "brief Bengali summary"
-}
-
-Text to analyze:
-${text}`;
+    document.getElementById('resultWrap').classList.remove('show');
+    showStatus('loading', 'Llama Vision বিশ্লেষণ করছে...');
 
     try {
       const response = await fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ image: currentBase64 })
       });
 
       if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Worker error ${response.status}: ${errText}`);
+        const t = await response.text();
+        throw new Error(`Worker ${response.status}: ${t}`);
       }
 
       const data = await response.json();
+      lastRaw = data.content || JSON.stringify(data);
 
-      // Extract text from Claude response
-      let rawText = '';
-      if (data.content && Array.isArray(data.content)) {
-        rawText = data.content.map(b => b.text || '').join('');
-      } else if (typeof data === 'string') {
-        rawText = data;
-      } else if (data.text) {
-        rawText = data.text;
-      } else {
-        rawText = JSON.stringify(data);
-      }
-
-      // Try to parse JSON from response
+      // Parse JSON from AI response
       let parsed = null;
       try {
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-      } catch (e) { /* fallback to raw display */ }
+        const m = lastRaw.match(/\{[\s\S]*\}/);
+        if (m) parsed = JSON.parse(m[0]);
+      } catch(e) {}
 
-      showStatus('success', '✓ বিশ্লেষণ সম্পন্ন!');
-      renderResult(parsed, rawText);
+      document.getElementById('status').className = 'status';
+      renderTable(parsed, lastRaw);
 
-    } catch (err) {
-      showStatus('error', '✗ Error: ' + err.message);
-      console.error(err);
+    } catch(err) {
+      showStatus('error', '✗ ' + err.message);
     } finally {
       btn.disabled = false;
     }
   }
 
-  function renderResult(parsed, raw) {
-    const card = document.getElementById('resultCard');
-    const grid = document.getElementById('dateGrid');
-    const rawBox = document.getElementById('rawBox');
+  function renderTable(parsed, raw) {
+    const tbody = document.getElementById('dateTableBody');
+    const summaryRow = document.getElementById('summaryRow');
+    tbody.innerHTML = '';
 
-    grid.innerHTML = '';
-    rawBox.textContent = raw;
-    rawBox.classList.remove('open');
+    const year = (parsed && parsed.year) ? parsed.year : '2026';
+    const dates = (parsed && parsed.dates) ? parsed.dates : [];
+    lastDates = dates;
 
-    if (parsed && parsed.found && parsed.dates && parsed.dates.length > 0) {
-      parsed.dates.forEach((d, i) => {
-        const delay = i * 60;
-        grid.innerHTML += `
-          <div class="date-item" style="animation-delay:${delay}ms">
-            <div class="date-label">তারিখ ${i + 1} · মূল</div>
-            <div class="date-value accent">${d.original || '—'}</div>
-            <div class="date-label" style="margin-top:10px">বাংলা</div>
-            <div class="date-value">${d.bengali || '—'}</div>
-            <div class="date-label" style="margin-top:10px">ISO ফরম্যাট</div>
-            <div class="date-value success" style="font-size:13px">${d.iso || '—'}</div>
-            ${d.context ? `<div class="date-label" style="margin-top:10px;font-size:9px;color:#4b4b60">${d.context}</div>` : ''}
-          </div>`;
+    if (dates.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:13px">কোনো তারিখ পাওয়া যায়নি</td></tr>`;
+      summaryRow.textContent = '';
+    } else {
+      const filled = dates.filter(d => !d.blank).length;
+
+      dates.forEach((d, i) => {
+        const tr = document.createElement('tr');
+        tr.style.animationDelay = (i * 40) + 'ms';
+
+        if (d.blank) {
+          tr.innerHTML = `
+            <td class="td-num">${d.num || i+1}</td>
+            <td colspan="4" class="td-blank"><span class="badge-blank">BLANK / X</span></td>`;
+        } else {
+          const monthName = MONTHS_DE[parseInt(d.month)] || d.month;
+          const fullDate = `${d.day}.${d.month}.${year}`;
+          tr.innerHTML = `
+            <td class="td-num">${d.num || i+1}</td>
+            <td class="td-raw">${d.raw || '—'}</td>
+            <td class="td-day">${d.day || '—'}</td>
+            <td class="td-month month-de">${monthName}</td>
+            <td class="td-full">${fullDate}</td>`;
+        }
+        tbody.appendChild(tr);
       });
 
-      if (parsed.summary) {
-        grid.innerHTML += `
-          <div class="date-item" style="grid-column:1/-1;animation-delay:${parsed.dates.length * 60}ms;border-color:rgba(192,38,211,0.3)">
-            <div class="date-label">সারসংক্ষেপ</div>
-            <div style="font-family:'Tiro Bangla',serif;font-size:14px;color:#c4c4d4;line-height:1.7">${parsed.summary}</div>
-          </div>`;
-      }
-    } else if (parsed && !parsed.found) {
-      grid.innerHTML = `<div class="date-item" style="grid-column:1/-1;text-align:center;padding:30px">
-        <div style="font-size:32px;margin-bottom:10px">📭</div>
-        <div class="date-value" style="color:var(--muted)">কোনো তারিখ পাওয়া যায়নি</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:6px">${parsed.summary || ''}</div>
-      </div>`;
-    } else {
-      // fallback: show raw only
-      grid.innerHTML = `<div class="date-item" style="grid-column:1/-1">
-        <div class="date-label">AI রেসপন্স</div>
-        <div style="font-size:13px;line-height:1.7;color:#c4c4d4;white-space:pre-wrap">${raw}</div>
-      </div>`;
+      summaryRow.innerHTML = `✓ &nbsp;${dates.length} rows processed · ${filled} dates found · Year: ${year}`;
     }
 
-    card.classList.add('visible');
-    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('rawBox').textContent = raw;
+    document.getElementById('rawBox').classList.remove('open');
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function showStatus(type, msg) {
@@ -563,8 +716,8 @@ ${text}`;
     el.className = 'status ' + type;
     document.getElementById('statusText').textContent = msg;
     if (type !== 'loading') {
-      const spinner = el.querySelector('.spinner');
-      if (spinner) spinner.style.display = 'none';
+      const sp = el.querySelector('.spinner');
+      if (sp) sp.style.display = 'none';
     }
   }
 
@@ -572,24 +725,24 @@ ${text}`;
     const box = document.getElementById('rawBox');
     box.classList.toggle('open');
     document.querySelector('.raw-toggle').textContent =
-      box.classList.contains('open') ? 'লুকান ▴' : 'সম্পূর্ণ AI রেসপন্স দেখুন ▾';
+      box.classList.contains('open') ? '▾ Raw AI Response লুকান' : '▸ Raw AI Response দেখুন';
   }
 
-  function clearAll() {
-    document.getElementById('inputText').value = '';
-    document.getElementById('resultCard').classList.remove('visible');
-    document.getElementById('status').className = 'status';
-    document.getElementById('extractBtn').disabled = false;
-  }
-
-  function copyResult() {
-    const items = document.querySelectorAll('.date-item');
-    let text = 'MW Date Extractor - ফলাফল\n\n';
-    items.forEach(item => { text += item.innerText + '\n---\n'; });
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.querySelector('.result-header .btn-secondary');
-      btn.textContent = '✓ কপি হয়েছে!';
-      setTimeout(() => btn.textContent = 'কপি করুন', 2000);
+  function copyCSV() {
+    if (!lastDates.length) return;
+    const year = '2026';
+    let csv = 'Row,Raw,Day,Month,Full Date\n';
+    lastDates.forEach((d, i) => {
+      if (d.blank) {
+        csv += `${d.num || i+1},BLANK,,,\n`;
+      } else {
+        csv += `${d.num || i+1},${d.raw},${d.day},${d.month},${d.day}.${d.month}.${year}\n`;
+      }
+    });
+    navigator.clipboard.writeText(csv).then(() => {
+      const btn = document.querySelector('.btn-copy');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = 'CSV কপি করুন', 2000);
     });
   }
 </script>
