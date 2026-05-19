@@ -19,95 +19,239 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
 
-  header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--panel); }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--panel);
+  }
   header .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
   header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
-  header .version { color: var(--muted); font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+  header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
-  #auto-banner { display: none; padding: 8px 20px; background: rgba(0,255,136,0.08); border-bottom: 1px solid var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); text-align: center; animation: banner-pulse 1.5s ease-in-out infinite; }
-  @keyframes banner-pulse { 0%,100% { background: rgba(0,255,136,0.08); } 50% { background: rgba(0,255,136,0.14); } }
+  #auto-banner {
+    display: none;
+    padding: 8px 20px;
+    background: rgba(0,255,136,0.08);
+    border-bottom: 1px solid var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.06em;
+    animation: banner-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes banner-pulse {
+    0%,100% { background: rgba(0,255,136,0.08); }
+    50%      { background: rgba(0,255,136,0.14); }
+  }
   #auto-banner.show { display: block; }
 
-  main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 57px); }
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    height: calc(100vh - 57px);
+  }
 
-  #left-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  #left-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
 
-  .panel-header { padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 8px; }
-  .badge { font-size: 0.58rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
-  .badge-green { background: var(--accent); color: #000; }
-  .badge-blue  { background: var(--accent2); color: #fff; }
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header .badge { background: var(--accent); color: #000; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+  .panel-header .badge-blue { background: var(--accent2); color: #fff; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
 
-  #drop-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; cursor: pointer; transition: background 0.2s; position: relative; overflow: hidden; }
+  #drop-zone {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px; cursor: pointer; transition: background 0.2s;
+    position: relative; overflow: hidden;
+  }
   #drop-zone:hover { background: rgba(0,255,136,0.03); }
   #drop-zone.has-image { justify-content: flex-start; padding: 0; }
   #drop-zone .placeholder { text-align: center; pointer-events: none; }
   #drop-zone .placeholder .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
   #drop-zone .placeholder p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
   #drop-zone .placeholder p strong { color: var(--accent); }
+
   #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; padding: 12px; }
   #drop-zone.has-image #preview-img { display: block; }
   #drop-zone.has-image .placeholder { display: none; }
   #file-input { display: none; }
 
-  #right-panel { display: flex; flex-direction: column; overflow: hidden; }
+  #right-panel { display: flex; flex-direction: column; }
 
-  #key-bar { padding: 8px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
+  #key-bar {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 6px;
+  }
   .key-row { display: flex; gap: 6px; align-items: center; }
-  .key-label { color: var(--muted); font-size: 0.62rem; font-family: monospace; white-space: nowrap; width: 48px; }
-  .key-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--accent2); font-family: monospace; font-size: 0.68rem; padding: 4px 8px; border-radius: 4px; outline: none; }
+  .key-label { color: var(--muted); font-size: 0.65rem; font-family: monospace; white-space: nowrap; width: 52px; }
+  .key-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--accent2); font-family: monospace; font-size: 0.7rem;
+    padding: 5px 8px; border-radius: 4px; outline: none;
+  }
   .key-input:focus { border-color: var(--accent2); }
   .key-active { border-color: var(--accent) !important; }
-  #save-keys-btn { background: var(--accent); color: #000; font-family: monospace; font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border: none; border-radius: 4px; cursor: pointer; }
-  #key-status-line { font-family: monospace; font-size: 0.62rem; color: var(--muted); }
+  #save-keys-btn {
+    background: var(--accent); color: #000; font-family: monospace;
+    font-size: 0.68rem; font-weight: 700; padding: 5px 10px;
+    border: none; border-radius: 4px; cursor: pointer; align-self: flex-end;
+  }
+  #key-status-line { font-family: monospace; font-size: 0.65rem; color: var(--muted); text-align: right; }
 
-  #model-bar { padding: 6px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
-  .model-label { color: var(--muted); font-size: 0.62rem; font-family: monospace; white-space: nowrap; }
-  #model-select { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--accent2); font-family: monospace; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
+  #model-bar {
+    padding: 7px 16px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .model-label { color: var(--muted); font-size: 0.65rem; font-family: monospace; white-space: nowrap; }
+  #model-select {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--accent2); font-family: monospace; font-size: 0.68rem;
+    padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer;
+  }
+  #model-select:focus { border-color: var(--accent2); }
 
-  #action-bar { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  #action-bar { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
 
-  button { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 700; padding: 8px 14px; border: none; border-radius: 5px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
-  #extract-btn { background: var(--accent); color: #000; flex: 1; box-shadow: 0 0 16px rgba(0,255,136,0.2); }
-  #extract-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
-  #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+  button {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    padding: 9px 18px; border: none; border-radius: 5px;
+    cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.15s;
+  }
+  #extract-btn { background: var(--accent); color: #000; flex: 1; }
+  #extract-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
+  #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   #clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   #clear-btn:hover { border-color: var(--danger); color: var(--danger); }
   #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  #status { padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; min-height: 32px; border-bottom: 1px solid var(--border); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  #debug-btn {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    font-size: 0.65rem; padding: 6px 10px;
+  }
+  #debug-btn.active { color: #ffcc00; border-color: #ffcc00; }
+
+  #status {
+    padding: 10px 16px; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; min-height: 36px; border-bottom: 1px solid var(--border);
+    color: var(--muted); display: flex; align-items: center; gap: 8px;
+  }
   #status.running { color: var(--accent2); }
   #status.done { color: var(--accent); }
   #status.error { color: var(--danger); }
 
-  .spinner { width: 11px; height: 11px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; flex-shrink: 0; }
+  .spinner {
+    width: 12px; height: 12px; border: 2px solid transparent;
+    border-top-color: currentColor; border-radius: 50%;
+    animation: spin 0.6s linear infinite; display: none;
+  }
   .running .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #results-area { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  #results-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
 
-  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center; }
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center;
+  }
   .empty-state .icon { font-size: 2.5rem; opacity: 0.2; }
 
-  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
 
-  .date-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; transition: border-color 0.15s; animation: fadeIn 0.22s ease both; }
+  .date-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 6px;
+    transition: border-color 0.15s; animation: fadeIn 0.2s ease both;
+  }
   .date-item:hover { border-color: var(--accent); }
   @keyframes fadeIn { from { opacity:0; transform: translateX(8px); } to { opacity:1; transform: none; } }
 
-  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); width: 18px; text-align: right; flex-shrink: 0; }
-  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); font-weight: 700; flex: 1; }
-  .date-full { font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 22px; text-align: right; flex-shrink: 0; }
+  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
+  .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  .error-box { background: rgba(255,68,102,0.07); border: 1px solid rgba(255,68,102,0.3); border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #ff8899; white-space: pre-wrap; line-height: 1.7; }
+  #debug-panel {
+    display: none;
+    background: #0d0d18;
+    border: 1px solid #ffcc0044;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 4px;
+  }
+  #debug-panel.show { display: block; }
+  #debug-panel .debug-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem; color: #ffcc00; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  #debug-raw {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    color: #aaa; white-space: pre-wrap; line-height: 1.6;
+    max-height: 200px; overflow-y: auto;
+    word-break: break-all;
+  }
+  #debug-raw::-webkit-scrollbar { width: 3px; }
+  #debug-raw::-webkit-scrollbar-thumb { background: #ffcc0033; }
 
-  footer { padding: 7px 16px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .raw-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted);
+    white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
+  }
+
+  footer {
+    padding: 10px 20px; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); display: flex; justify-content: space-between;
+  }
   #count-display { color: var(--accent2); }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--accent); color: #000; padding: 10px 22px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; transition: transform 0.3s; z-index: 999; pointer-events: none; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--accent); color: #000;
+    padding: 10px 22px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    transition: transform 0.3s; z-index: 999; pointer-events: none;
+  }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   #results-area::-webkit-scrollbar { width: 4px; }
@@ -120,7 +264,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span class="version">v3.1 — Handwriting OCR Fixed</span>
+  <span>v2.5 — Blank Hidden · Fast Mode</span>
 </header>
 
 <div id="auto-banner">⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...</div>
@@ -129,16 +273,17 @@
   <div id="left-panel">
     <div class="panel-header">
       📷 Screenshot / Image
-      <span class="badge badge-green">DROP or CLICK</span>
-      <span class="badge badge-blue">AUTO</span>
+      <span class="badge">DROP or CLICK</span>
+      <span class="badge-blue">AUTO</span>
     </div>
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="placeholder">
         <div class="icon">🖼️</div>
-        <p>Click to upload or<br><strong>drag & drop</strong></p>
-        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG · Ctrl+V to paste</p>
+        <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
+        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
+        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
       </div>
-      <img id="preview-img" alt="preview" />
+      <img id="preview-img" alt="Screenshot preview" />
     </div>
     <input type="file" id="file-input" accept="image/*">
   </div>
@@ -153,33 +298,36 @@
       </div>
       <div class="key-row">
         <span class="key-label">KEY 2:</span>
-        <input id="key2" class="key-input" type="password" placeholder="optional" />
+        <input id="key2" class="key-input" type="password" placeholder="sk-or-v1-... (optional)" />
       </div>
       <div class="key-row">
         <span class="key-label">KEY 3:</span>
-        <input id="key3" class="key-input" type="password" placeholder="optional" />
+        <input id="key3" class="key-input" type="password" placeholder="sk-or-v1-... (optional)" />
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span id="key-status-line">— key loaded</span>
-        <button id="save-keys-btn" onclick="saveKeys()">💾 SAVE</button>
+        <button id="save-keys-btn" onclick="saveKeys()">💾 SAVE KEYS</button>
       </div>
     </div>
 
     <div id="model-bar">
       <span class="model-label">🤖 MODEL:</span>
       <select id="model-select" onchange="saveModel()">
-        <option value="qwen/qwen2.5-vl-72b-instruct:free">Qwen 2.5 VL 72B ⭐ (Best OCR)</option>
-        <option value="qwen/qwen2.5-vl-32b-instruct:free">Qwen 2.5 VL 32B (free)</option>
-        <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (free)</option>
-        <option value="meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 11B (free)</option>
-        <option value="openrouter/auto">Auto Best Available</option>
+        <option value="qwen/qwen2.5-vl-32b-instruct:free">Qwen 2.5 VL 32B (free) ⭐ FAST</option>
+        <option value="openrouter/auto">openrouter/auto — Auto Best Available</option>
+        <option value="meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 11B Vision (free)</option>
+        <option value="google/gemma-3-27b-it:free">Gemma 3 27B (free)</option>
+        <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 24B (free)</option>
+        <option value="moonshotai/kimi-vl-a3b-thinking:free">Kimi VL A3B Thinking (free)</option>
+        <option value="google/gemini-flash-1.5">Gemini Flash 1.5 (paid)</option>
       </select>
     </div>
 
     <div id="action-bar">
       <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
-      <button id="copy-btn" disabled onclick="copyAll()">📋 Copy</button>
-      <button id="clear-btn" onclick="clearAll()">✕</button>
+      <button id="copy-btn" disabled onclick="copyAll()">📋 Copy All</button>
+      <button id="debug-btn" onclick="toggleDebug()">🐛 DEBUG</button>
+      <button id="clear-btn" onclick="clearAll()">✕ Clear</button>
     </div>
 
     <div id="status">
@@ -190,26 +338,60 @@
     <div id="results-area">
       <div class="empty-state" id="empty-state">
         <div class="icon">🗓️</div>
-        <p>Dates will appear here</p>
+        <p>Dates will appear here<br>after extraction</p>
       </div>
     </div>
 
     <footer>
-      <span id="footer-model">OpenRouter · Handwriting OCR</span>
+      <span id="footer-model">Powered by Qwen 2.5 VL 32B</span>
       <span id="count-display">—</span>
     </footer>
   </div>
 </main>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">✓ Copied!</div>
 
 <script>
   let currentImageBase64 = null;
-  let currentImageMime   = 'image/png';
-  let extractedDates     = [];
-  let currentKeyIndex    = 0;
+  let extractedDates = [];
+  let currentKeyIndex = 0;
+  let debugMode = false;
 
-  // ── Key / Model helpers ───────────────────────────────────────
+  function toggleDebug() {
+    debugMode = !debugMode;
+    document.getElementById('debug-btn').classList.toggle('active', debugMode);
+    document.getElementById('debug-btn').textContent = debugMode ? '🐛 DEBUG ON' : '🐛 DEBUG';
+    let dp = document.getElementById('debug-panel');
+    if (dp) dp.classList.toggle('show', debugMode);
+  }
+
+  function showDebug(label, content) {
+    let dp = document.getElementById('debug-panel');
+    if (!dp) {
+      dp = document.createElement('div');
+      dp.id = 'debug-panel';
+      dp.innerHTML = '<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw"></pre>';
+      const ra = document.getElementById('results-area');
+      ra.insertBefore(dp, ra.firstChild);
+    }
+    dp.classList.toggle('show', debugMode);
+    const raw = document.getElementById('debug-raw');
+    if (raw) raw.textContent = `[${label}]\n${content}`;
+  }
+
+  function saveModel() {
+    const sel = document.getElementById('model-select');
+    localStorage.setItem('or_model', sel.value);
+    document.getElementById('footer-model').textContent = 'Model: ' + sel.selectedOptions[0].text;
+  }
+  function loadModel() {
+    const saved = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-32b-instruct:free';
+    const sel = document.getElementById('model-select');
+    if ([...sel.options].some(o => o.value === saved)) sel.value = saved;
+    else { sel.value = 'qwen/qwen2.5-vl-32b-instruct:free'; localStorage.setItem('or_model','qwen/qwen2.5-vl-32b-instruct:free'); }
+    document.getElementById('footer-model').textContent = 'Model: ' + (sel.selectedOptions[0]?.text || saved);
+  }
+
   function loadKeys() {
     document.getElementById('key1').value = localStorage.getItem('or_key1') || '';
     document.getElementById('key2').value = localStorage.getItem('or_key2') || '';
@@ -217,123 +399,134 @@
     updateKeyStatus();
   }
   function saveKeys() {
-    ['key1','key2','key3'].forEach((id,i) =>
-      localStorage.setItem(`or_key${i+1}`, document.getElementById(id).value.trim()));
+    localStorage.setItem('or_key1', document.getElementById('key1').value.trim());
+    localStorage.setItem('or_key2', document.getElementById('key2').value.trim());
+    localStorage.setItem('or_key3', document.getElementById('key3').value.trim());
     currentKeyIndex = 0;
     updateKeyStatus();
     showToast('✓ Keys saved!');
   }
   function getKeys() {
-    return ['or_key1','or_key2','or_key3'].map(k => localStorage.getItem(k)||'').filter(Boolean);
+    return ['or_key1','or_key2','or_key3']
+      .map(k => localStorage.getItem(k) || '')
+      .filter(k => k.length > 0);
   }
   function updateKeyStatus() {
     const keys = getKeys();
-    document.getElementById('key-status-line').textContent = `${keys.length} key(s) · Active: KEY ${currentKeyIndex+1}`;
-    ['key1','key2','key3'].forEach((id,i) => {
-      document.getElementById(id).classList.toggle('key-active', i===currentKeyIndex && !!document.getElementById(id).value.trim());
+    document.getElementById('key-status-line').textContent =
+      `${keys.length} key(s) loaded · Active: KEY ${currentKeyIndex + 1}`;
+    ['key1','key2','key3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.toggle('key-active', i === currentKeyIndex && el.value.trim().length > 0);
     });
   }
 
-  function saveModel() {
-    const sel = document.getElementById('model-select');
-    localStorage.setItem('or_model', sel.value);
-    document.getElementById('footer-model').textContent = sel.selectedOptions[0].text;
-  }
-  function loadModel() {
-    const saved = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-72b-instruct:free';
-    const sel = document.getElementById('model-select');
-    if ([...sel.options].some(o=>o.value===saved)) sel.value = saved;
-    document.getElementById('footer-model').textContent = sel.selectedOptions[0]?.text || saved;
-  }
+  loadKeys();
+  loadModel();
 
-  loadKeys(); loadModel();
-
-  // ── Restore last session ──────────────────────────────────────
-  (function(){
+  // ── Restore last result ──
+  (function() {
     try {
-      const img   = localStorage.getItem('mw_ocr_last_image');
-      const mime  = localStorage.getItem('mw_ocr_last_mime') || 'image/png';
-      const dates = localStorage.getItem('mw_ocr_last_dates');
-      const year  = localStorage.getItem('mw_ocr_last_year');
-      const ts    = localStorage.getItem('mw_ocr_last_result_ts');
-      if (img) { loadBase64(img, mime); }
-      if (dates) {
-        const d = JSON.parse(dates); extractedDates = d;
-        renderDates(year||'', d);
-        document.getElementById('copy-btn').disabled = !d.some(x=>!x.blank);
-        document.getElementById('count-display').textContent = d.filter(x=>!x.blank).length + ' dates found';
-        setStatus('done', '✓ Restored' + (ts ? ' · ' + new Date(+ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ''));
+      const savedImg   = localStorage.getItem('mw_ocr_last_image');
+      const savedMime  = localStorage.getItem('mw_ocr_last_mime');
+      const savedDates = localStorage.getItem('mw_ocr_last_dates');
+      const savedYear  = localStorage.getItem('mw_ocr_last_year');
+      const savedTs    = localStorage.getItem('mw_ocr_last_result_ts');
+      if (savedImg) {
+        const mime = savedMime || 'image/png';
+        document.getElementById('preview-img').src = 'data:' + mime + ';base64,' + savedImg;
+        document.getElementById('drop-zone').classList.add('has-image');
+        currentImageBase64 = savedImg;
+        document.getElementById('extract-btn').disabled = false;
       }
-    } catch(e){}
+      if (savedDates) {
+        const dates = JSON.parse(savedDates);
+        extractedDates = dates;
+        renderDates(savedYear || '', dates);
+        const validDates = dates.filter(d=>!d.blank);
+        document.getElementById('copy-btn').disabled = validDates.length === 0;
+        document.getElementById('count-display').textContent = validDates.length + ' dates found';
+        const ts = savedTs ? ' · ' + new Date(parseInt(savedTs)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+        setStatus('done', '✓ Last result restored' + ts);
+      }
+    } catch(e) {}
   })();
 
-  // ── File loading ──────────────────────────────────────────────
-  document.getElementById('file-input').addEventListener('change', e => { if(e.target.files[0]) loadFile(e.target.files[0]); });
-  const dz = document.getElementById('drop-zone');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.background='rgba(0,255,136,0.06)'; });
-  dz.addEventListener('dragleave', () => dz.style.background='');
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.style.background='';
+  // ── File input / drag / paste ──
+  document.getElementById('file-input').addEventListener('change', e => { if (e.target.files[0]) loadImageFile(e.target.files[0]); });
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background='rgba(0,255,136,0.06)'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.style.background=''; });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.style.background='';
     const f = e.dataTransfer.files[0];
-    if (f?.type.startsWith('image/')) loadFile(f);
+    if (f && f.type.startsWith('image/')) loadImageFile(f);
   });
   document.addEventListener('paste', e => {
     for (const item of e.clipboardData.items)
-      if (item.type.startsWith('image/')) { loadFile(item.getAsFile()); break; }
+      if (item.type.startsWith('image/')) { loadImageFile(item.getAsFile()); break; }
   });
+
+  function loadImageFromBase64(base64, mime) {
+    if (!base64) return false;
+    const mimeType = mime || 'image/png';
+    document.getElementById('preview-img').src = 'data:' + mimeType + ';base64,' + base64;
+    document.getElementById('drop-zone').classList.add('has-image');
+    currentImageBase64 = base64;
+    document.getElementById('extract-btn').disabled = false;
+    try { localStorage.setItem('mw_ocr_last_image', base64); localStorage.setItem('mw_ocr_last_mime', mimeType); } catch(e) {}
+    return true;
+  }
 
   window.addEventListener('mw_ocr_image_ready', e => {
-    try { const {base64,mime}=e.detail; if(base64){loadBase64(base64,mime||'image/png');showBanner();setTimeout(extractDates,800);} } catch(e){}
+    try {
+      const { base64, mime } = e.detail;
+      if (!base64 || !loadImageFromBase64(base64, mime||'image/png')) return;
+      document.getElementById('auto-banner').classList.add('show');
+      setTimeout(() => document.getElementById('auto-banner').classList.remove('show'), 5000);
+      setTimeout(() => extractDates(), 800);
+    } catch(e) {}
   });
   window.addEventListener('message', e => {
-    if(e.data?.type==='MW_OCR_IMAGE'&&e.data.base64){loadBase64(e.data.base64,'image/png');showBanner();setTimeout(extractDates,800);}
+    if (!e.data || e.data.type !== 'MW_OCR_IMAGE' || !e.data.base64) return;
+    if (!loadImageFromBase64(e.data.base64, 'image/png')) return;
+    document.getElementById('auto-banner').classList.add('show');
+    setTimeout(() => document.getElementById('auto-banner').classList.remove('show'), 5000);
+    setTimeout(() => extractDates(), 800);
   });
 
-  function showBanner() {
-    const b=document.getElementById('auto-banner'); b.classList.add('show');
-    setTimeout(()=>b.classList.remove('show'),5000);
-  }
-  function loadBase64(b64, mime) {
-    currentImageBase64=b64; currentImageMime=mime||'image/png';
-    document.getElementById('preview-img').src=`data:${currentImageMime};base64,${b64}`;
-    document.getElementById('drop-zone').classList.add('has-image');
-    document.getElementById('extract-btn').disabled=false;
-    try{localStorage.setItem('mw_ocr_last_image',b64);localStorage.setItem('mw_ocr_last_mime',currentImageMime);}catch(e){}
-  }
-  function loadFile(file) {
-    const r=new FileReader();
-    r.onload=ev=>{
-      const p=ev.target.result.split(',');
-      loadBase64(p[1], p[0].match(/:(.*?);/)[1]);
-      setStatus('idle','Image loaded — click Extract Dates');
+  function loadImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      document.getElementById('preview-img').src = dataUrl;
+      document.getElementById('drop-zone').classList.add('has-image');
+      currentImageBase64 = dataUrl.split(',')[1];
+      document.getElementById('extract-btn').disabled = false;
+      setStatus('idle', 'Image loaded — click Extract Dates');
     };
-    r.readAsDataURL(file);
+    reader.readAsDataURL(file);
   }
 
-  // ── THE IMPROVED PROMPT ───────────────────────────────────────
-  const PROMPT = `You are an expert OCR system specialized in reading HANDWRITTEN German medical forms (Heilmittelverordnung).
-
-TASK: Extract ALL dates from the "Datum" column in this image.
-
-IMPORTANT RULES FOR HANDWRITTEN DATES:
-- Dates are handwritten and may look messy, crossed out, or hard to read
-- Common format: DD.MM.YY or DD.MM.YYYY (e.g. "12.10.25" means 12 October 2025)
-- Look very carefully at each handwritten digit — do NOT guess, read exactly what is written
-- If a cell is EMPTY (no writing at all) → blank:true, raw:"X"
-- If a cell has a date that is CROSSED OUT with a line through it → still include the date but note it (blank:false, crossed:true)
-- Do NOT confuse similar digits: 1/7, 3/8, 0/6, 5/6
-
-OUTPUT: Return ONLY valid JSON, no markdown, no explanation:
-{"year":"2025","dates":[{"num":1,"raw":"12.10.25","day":"12","month":"10","blank":false},{"num":2,"raw":"24.11.25","day":"24","month":"11","blank":false,"crossed":true},{"num":7,"raw":"X","blank":true}]}
-
-Read each row carefully from top to bottom. Include ALL rows (filled and empty).`;
-
-  // ── API call ──────────────────────────────────────────────────
-  async function callAPI(b64, mime, keyIdx) {
+  // ── Core API call ──
+  async function callOpenRouter(base64, keyIndex) {
     const keys = getKeys();
-    if (!keys.length) throw new Error('API Key নেই! KEY 1 বক্সে দিন।');
-    const key   = keys[keyIdx % keys.length];
-    const model = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-72b-instruct:free';
+    if (!keys.length) throw new Error('কোনো API Key নেই! উপরে KEY বক্সে দিন।');
+    const key   = keys[keyIndex % keys.length];
+    const model = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-32b-instruct:free';
+
+    // FAST & COMPACT prompt — fewer tokens = faster response
+    const PROMPT = `OCR expert. Extract handwritten dates from the "Datum" column of this German medical form.
+Format: DD.MM.YY (day.month.year). Dots may look like slashes in handwriting.
+
+Rules:
+- Filled row → {num, raw:"DD.MM.YY", day:"DD", month:"MM", blank:false}
+- Empty/X row → {num, raw:"X", blank:true}
+- Zero-pad day and month to 2 digits
+- year = majority 4-digit year (e.g. "2026")
+
+Return ONLY valid JSON, no markdown:
+{"year":"2026","dates":[{"num":1,"raw":"13.4.26","day":"13","month":"04","blank":false},{"num":11,"raw":"X","blank":true}]}`;
 
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -348,70 +541,87 @@ Read each row carefully from top to bottom. Include ALL rows (filled and empty).
         messages: [{
           role: 'user',
           content: [
-            { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
+            { type: 'image_url', image_url: { url: `data:image/png;base64,${base64}` } },
             { type: 'text', text: PROMPT }
           ]
         }],
         temperature: 0,
-        max_tokens: 1500
+        max_tokens: 600   // ✅ REDUCED from 1500 → 600 for speed (20 dates × ~25 tokens each)
       })
     });
 
-    const raw = await resp.text();
+    const rawText = await resp.text();
+    showDebug(`HTTP ${resp.status} · model=${model} · key=${keyIndex+1}`, rawText);
+
     if (!resp.ok) {
-      let msg = `HTTP ${resp.status}`;
-      try { msg = JSON.parse(raw).error?.message || msg; } catch(e) {}
-      throw new Error(msg);
+      let errMsg = `HTTP ${resp.status}`;
+      try { const j = JSON.parse(rawText); errMsg = j.error?.message || errMsg; } catch(e) {}
+      throw new Error(errMsg);
     }
-    const data = JSON.parse(raw);
+
+    let data;
+    try { data = JSON.parse(rawText); } catch(e) { throw new Error('Invalid JSON from API: ' + rawText.slice(0,200)); }
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    const content = data.choices?.[0]?.message?.content || '';
-    if (!content.trim()) throw new Error(`Empty response (finish: ${data.choices?.[0]?.finish_reason}). Try another model.`);
-    return content;
+
+    const choice = data.choices?.[0];
+    if (!choice) throw new Error('No choices in response. Full: ' + rawText.slice(0,400));
+
+    const content = choice.message?.content;
+    if (!content || content.trim() === '') {
+      const reason = choice.finish_reason || 'unknown';
+      throw new Error(`Empty content (finish_reason: ${reason}). Try a different model.`);
+    }
+
+    return { content, rawResponse: rawText };
   }
 
-  // ── Extract orchestrator ──────────────────────────────────────
+  // ── Extract dates orchestrator ──
   async function extractDates() {
     if (!currentImageBase64) return;
     const keys = getKeys();
-    if (!keys.length) { setStatus('error','✗ API Key নেই'); return; }
+    if (!keys.length) { setStatus('error', '✗ API Key নেই — KEY 1 বক্সে দিন'); return; }
 
     document.getElementById('extract-btn').disabled = true;
     document.getElementById('results-area').innerHTML = '';
-    let lastErr = null;
+
+    const oldDp = document.getElementById('debug-panel');
+    if (oldDp) oldDp.remove();
+
+    let lastError = null;
 
     for (let attempt = 0; attempt < keys.length; attempt++) {
-      const ki = (currentKeyIndex + attempt) % keys.length;
+      const keyIdx = (currentKeyIndex + attempt) % keys.length;
       try {
-        setStatus('running', `🔍 হাতের লেখা পড়ছি... (KEY ${ki+1})`);
-        const content = await callAPI(currentImageBase64, currentImageMime, ki);
+        setStatus('running', `Extracting... (KEY ${keyIdx + 1})`);
+        const { content } = await callOpenRouter(currentImageBase64, keyIdx);
 
-        // Robust JSON parse
         let parsed = null;
-        for (const fn of [
+        const tries = [
           () => JSON.parse(content),
-          () => JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] ?? ''),
-          () => JSON.parse(content.replace(/```json|```/gi,'').trim()),
-          () => JSON.parse(content.replace(/```json|```/gi,'').match(/\{[\s\S]*\}/)?.[0] ?? '')
-        ]) { try { parsed = fn(); if (parsed) break; } catch(e) {} }
+          () => { const m = content.match(/\{[\s\S]*\}/); if (!m) throw 0; return JSON.parse(m[0]); },
+          () => { const s = content.replace(/```json|```/gi,'').trim(); return JSON.parse(s); },
+          () => { const m = content.replace(/```json|```/gi,'').match(/\{[\s\S]*\}/); if (!m) throw 0; return JSON.parse(m[0]); }
+        ];
+        for (const fn of tries) { try { parsed = fn(); break; } catch(e) {} }
 
-        if (!parsed) throw new Error('JSON parse failed.\n\nRaw response:\n' + content.slice(0,500));
+        if (!parsed) throw new Error('JSON parse error. Raw:\n' + content.slice(0, 400));
 
         extractedDates = parsed.dates || [];
-        const valid  = extractedDates.filter(d => !d.blank);
-        const blanks = extractedDates.length - valid.length;
+        const validDates = extractedDates.filter(d => !d.blank);
+        const blankCount = extractedDates.length - validDates.length;
 
         renderDates(parsed.year, extractedDates);
-        setStatus('done', `✓ ${valid.length}টি তারিখ · ${blanks}টি blank · KEY ${ki+1}`);
-        document.getElementById('copy-btn').disabled = valid.length === 0;
-        document.getElementById('count-display').textContent = `${valid.length} dates`;
 
-        currentKeyIndex = (ki+1) % keys.length;
+        setStatus('done', `✓ ${validDates.length}টি তারিখ${blankCount > 0 ? ` (${blankCount} blank লুকানো)` : ''} · KEY ${keyIdx + 1}`);
+        document.getElementById('copy-btn').disabled = validDates.length === 0;
+        document.getElementById('count-display').textContent = `${validDates.length} dates`;
+
+        currentKeyIndex = (keyIdx + 1) % keys.length;
         updateKeyStatus();
 
         try {
           localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
-          localStorage.setItem('mw_ocr_last_year', parsed.year||'');
+          localStorage.setItem('mw_ocr_last_year', parsed.year || '');
           localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
         } catch(e) {}
 
@@ -419,99 +629,114 @@ Read each row carefully from top to bottom. Include ALL rows (filled and empty).
         return;
 
       } catch(err) {
-        lastErr = err;
-        if (attempt < keys.length-1) {
-          setStatus('running', `KEY ${ki+1} fail → KEY ${((ki+1)%keys.length)+1} চেষ্টা...`);
-          await new Promise(r => setTimeout(r,800));
+        lastError = err;
+        if (attempt < keys.length - 1) {
+          setStatus('running', `KEY ${keyIdx+1} fail — KEY ${((keyIdx+1)%keys.length)+1} চেষ্টা...`);
+          await new Promise(r => setTimeout(r, 600));
         }
       }
     }
 
-    setStatus('error', '✗ ' + (lastErr?.message||'Unknown').split('\n')[0]);
+    const errMsg = lastError?.message || 'Unknown error';
+    setStatus('error', '✗ Failed: ' + errMsg.split('\n')[0]);
     document.getElementById('results-area').innerHTML =
-      `<div class="error-box">❌ ${escHtml(lastErr?.message||'')}\n\n💡 Tips:\n1. Qwen 2.5 VL 72B বেছে নিন (সবচেয়ে ভালো handwriting OCR)\n2. নতুন key নিন openrouter.ai থেকে\n3. কিছুক্ষণ পর retry করুন</div>`;
+      `<div class="raw-box">❌ Error: ${escHtml(errMsg)}
+
+💡 সমাধান:
+1. 🐛 DEBUG বাটন চাপুন → raw response দেখুন
+2. 🔄 MODEL: "Qwen 2.5 VL 32B (free) ⭐ FAST" বেছে নিন
+3. ⏳ কিছুক্ষণ পর আবার try করুন
+4. 🔑 openrouter.ai থেকে নতুন key নিন</div>`;
     document.getElementById('extract-btn').disabled = false;
   }
 
-  // ── Render ────────────────────────────────────────────────────
-  const MONTHS = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
 
+  // ── Render — BLANK ROWS HIDDEN ──
   function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
+
+    if (debugMode) {
+      const dp = document.createElement('div');
+      dp.id = 'debug-panel'; dp.className = 'show';
+      dp.innerHTML = '<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw">—</pre>';
+      area.appendChild(dp);
+    }
+
     if (!dates?.length) {
-      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
+      area.innerHTML += '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
       return;
     }
-    const lbl = document.createElement('div');
-    lbl.className = 'section-label';
-    lbl.textContent = `Year: ${year||'—'} · ${dates.filter(d=>!d.blank).length} valid · ${dates.filter(d=>d.blank).length} blank`;
-    area.appendChild(lbl);
 
-    // Sort: valid first (by date), then blank
-    const sorted = [...dates].sort((a,b) => {
-      if (a.blank && b.blank) return 0;
-      if (a.blank) return 1; if (b.blank) return -1;
-      return (parseInt(a.month)*100+parseInt(a.day)) - (parseInt(b.month)*100+parseInt(b.day));
-    });
+    // ✅ FIX 1: Filter out blank rows completely — don't render them
+    const validDates = dates.filter(d => !d.blank);
+    const blankCount = dates.length - validDates.length;
+
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.textContent = `Year: ${year||'—'} — ${validDates.length} dates${blankCount > 0 ? ` · ${blankCount} blank hidden` : ''}`;
+    area.appendChild(label);
+
+    if (!validDates.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = '<div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p>';
+      area.appendChild(empty);
+      return;
+    }
+
+    const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Sort by date (month then day)
+    const sorted = [...validDates].sort((a, b) =>
+      (parseInt(a.month)*100 + parseInt(a.day)) - (parseInt(b.month)*100 + parseInt(b.day))
+    );
 
     sorted.forEach((d, i) => {
-      const el = document.createElement('div');
-      el.className = 'date-item';
-      el.style.animationDelay = `${i*0.03}s`;
-
-      if (d.blank) {
-        el.style.opacity = '0.35';
-        el.style.borderColor = 'var(--danger)';
-        el.innerHTML = `<div class="date-num">${d.num}</div>
-          <div class="date-value" style="color:var(--danger);text-decoration:line-through">✕ BLANK</div>
-          <div class="date-full" style="color:var(--danger)">empty</div>`;
-      } else {
-        const mName = MONTHS[parseInt(d.month)] || d.month;
-        const raw   = escHtml(d.raw || `${d.day}.${d.month}`);
-        const crossedStyle = d.crossed ? 'text-decoration:line-through;opacity:0.7' : '';
-        const crossedNote  = d.crossed ? ' <span style="color:var(--danger);font-size:0.6rem">✕crossed</span>' : '';
-        el.innerHTML = `<div class="date-num">${d.num}</div>
-          <div class="date-value" style="${crossedStyle}">${raw}${crossedNote}</div>
-          <div class="date-full">${d.day} ${mName} ${year||''}</div>`;
-      }
-      area.appendChild(el);
+      const item = document.createElement('div');
+      item.className = 'date-item';
+      item.style.animationDelay = `${i * 0.03}s`;
+      const mName = months[parseInt(d.month)] || d.month;
+      item.innerHTML = `
+        <div class="date-num">${d.num}</div>
+        <div class="date-value">${escHtml(d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`)}</div>
+        <div class="date-full">${d.day} ${mName} ${year||''}</div>`;
+      area.appendChild(item);
     });
   }
 
-  // ── Utils ─────────────────────────────────────────────────────
   function copyAll() {
+    if (!extractedDates.length) return;
     const text = extractedDates.filter(d=>!d.blank).map(d=>d.raw||`${d.day}.${d.month}`).join('\n');
-    navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied!'));
+    navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
   }
 
   function clearAll() {
-    currentImageBase64=null; extractedDates=[];
-    document.getElementById('preview-img').src='';
+    currentImageBase64 = null; extractedDates = [];
+    document.getElementById('preview-img').src = '';
     document.getElementById('drop-zone').classList.remove('has-image');
-    document.getElementById('file-input').value='';
-    document.getElementById('extract-btn').disabled=true;
-    document.getElementById('copy-btn').disabled=true;
-    document.getElementById('results-area').innerHTML='<div class="empty-state"><div class="icon">🗓️</div><p>Dates will appear here</p></div>';
-    document.getElementById('count-display').textContent='—';
-    setStatus('idle','Upload a screenshot to get started');
-    try{['mw_ocr_last_dates','mw_ocr_last_year','mw_ocr_last_result_ts','mw_ocr_last_image','mw_ocr_last_mime'].forEach(k=>localStorage.removeItem(k));}catch(e){}
+    document.getElementById('file-input').value = '';
+    document.getElementById('extract-btn').disabled = true;
+    document.getElementById('copy-btn').disabled = true;
+    document.getElementById('results-area').innerHTML = `<div class="empty-state" id="empty-state"><div class="icon">🗓️</div><p>Dates will appear here<br>after extraction</p></div>`;
+    document.getElementById('count-display').textContent = '—';
+    setStatus('idle', 'Upload a screenshot to get started');
+    try { ['mw_ocr_last_dates','mw_ocr_last_year','mw_ocr_last_result_ts','mw_ocr_last_image','mw_ocr_last_mime'].forEach(k=>localStorage.removeItem(k)); } catch(e) {}
   }
 
   function setStatus(type, msg) {
     const el = document.getElementById('status');
-    el.className = type;
+    el.className = type === 'running' ? 'running' : type === 'done' ? 'done' : type === 'error' ? 'error' : '';
     document.getElementById('status-text').textContent = msg;
   }
 
   function showToast(msg) {
-    const t=document.getElementById('toast');
-    t.textContent=msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2000);
-  }
-
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
   }
 </script>
 </body>
