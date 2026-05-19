@@ -45,18 +45,18 @@
   #auto-banner {
     display: none;
     padding: 8px 20px;
-    background: rgba(0,255,136,0.08);
-    border-bottom: 1px solid var(--accent);
+    background: rgba(0,153,255,0.08);
+    border-bottom: 1px solid var(--accent2);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem;
-    color: var(--accent);
+    color: var(--accent2);
     text-align: center;
     letter-spacing: 0.06em;
     animation: banner-pulse 1.5s ease-in-out infinite;
   }
   @keyframes banner-pulse {
-    0%,100% { background: rgba(0,255,136,0.08); }
-    50%      { background: rgba(0,255,136,0.14); }
+    0%,100% { background: rgba(0,153,255,0.08); }
+    50%      { background: rgba(0,153,255,0.14); }
   }
   #auto-banner.show { display: block; }
 
@@ -132,6 +132,65 @@
   #file-input { display: none; }
 
   #right-panel { display: flex; flex-direction: column; }
+
+  /* ── Cloudflare Key Bar ── */
+  #key-bar {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(0,153,255,0.03);
+  }
+  .key-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .key-label {
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    width: 90px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .key-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .key-input:focus { border-color: var(--accent2); }
+  .save-btn {
+    background: var(--accent2);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .save-btn:hover { filter: brightness(1.2); }
+  .cf-hint {
+    font-size: 0.62rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    padding-left: 2px;
+  }
+  .cf-hint a { color: var(--accent2); text-decoration: none; }
+  .cf-hint a:hover { text-decoration: underline; }
 
   #action-bar {
     padding: 12px 16px;
@@ -217,19 +276,6 @@
     white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
   }
 
-  /* Rate limit warning bar */
-  #rate-warn {
-    display: none;
-    padding: 6px 16px;
-    background: rgba(255,68,102,0.08);
-    border-bottom: 1px solid var(--danger);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--danger);
-    text-align: center;
-  }
-  #rate-warn.show { display: block; }
-
   footer {
     padding: 10px 20px; border-top: 1px solid var(--border);
     font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
@@ -258,17 +304,11 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.0 — Mistral Pixtral · Auto-OCR · Last Result Restored</span>
+  <span>v2.0 — Cloudflare Workers AI (Llama 3.2 Vision) · Auto-OCR · Last Result Restored</span>
 </header>
 
-<!-- Extension থেকে ছবি আসলে এই banner দেখাবে -->
 <div id="auto-banner">
   ⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...
-</div>
-
-<!-- Rate limit warning -->
-<div id="rate-warn">
-  ⚠ Mistral free plan: মিনিটে মাত্র 2 request — একটু অপেক্ষা করুন তারপর আবার চেষ্টা করুন
 </div>
 
 <main>
@@ -283,7 +323,7 @@
         <div class="icon">🖼️</div>
         <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
         <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
-        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
+        <p style="margin-top:6px;font-size:0.72rem;color:#0099ff;">✓ MW Extension থেকেও auto-receive হবে</p>
       </div>
       <img id="preview-img" alt="Screenshot preview" />
     </div>
@@ -293,11 +333,21 @@
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
 
-    <!-- Mistral API Key input -->
-    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">MISTRAL KEY:</span>
-      <input id="api-key-input" type="password" placeholder="Enter Mistral API key..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
-      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    <!-- ── Cloudflare Credentials ── -->
+    <div id="key-bar">
+      <div class="key-row">
+        <span class="key-label">Account ID</span>
+        <input id="cf-account-id" class="key-input" type="password" placeholder="your-cloudflare-account-id" />
+        <button class="save-btn" onclick="saveKeys()">SAVE</button>
+      </div>
+      <div class="key-row">
+        <span class="key-label">API Token</span>
+        <input id="cf-api-token" class="key-input" type="password" placeholder="your-workers-ai-token" />
+      </div>
+      <div class="cf-hint">
+        👉 <a href="https://dash.cloudflare.com" target="_blank">dash.cloudflare.com</a> → Workers AI → Use REST API → Account ID + Create Token
+        · Free: 10,000 req/day · No card needed
+      </div>
     </div>
 
     <div id="action-bar">
@@ -319,7 +369,7 @@
     </div>
 
     <footer>
-      <span>Powered by Mistral AI (Pixtral)</span>
+      <span>Powered by Cloudflare Workers AI (Llama 3.2 Vision)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -329,19 +379,16 @@
 
 <script>
   let currentImageBase64 = null;
-  let currentImageMime   = 'image/png';
   let extractedDates = [];
 
-  // Rate limit tracking (Mistral free: 2 req/min)
-  let lastRequestTime = 0;
-  const MIN_INTERVAL_MS = 31000; // 31 seconds gap to be safe
+  // ── Load saved keys ──
+  document.getElementById('cf-account-id').value = localStorage.getItem('cf_account_id') || '';
+  document.getElementById('cf-api-token').value  = localStorage.getItem('cf_api_token')  || '';
 
-  const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('mistral_key') || '';
-
-  function saveKey() {
-    localStorage.setItem('mistral_key', inp.value.trim());
-    showToast('Key saved!');
+  function saveKeys() {
+    localStorage.setItem('cf_account_id', document.getElementById('cf-account-id').value.trim());
+    localStorage.setItem('cf_api_token',  document.getElementById('cf-api-token').value.trim());
+    showToast('Keys saved!');
   }
 
   // ── Page Load: last result restore ──
@@ -360,7 +407,6 @@
         previewEl.src = 'data:' + mimeType + ';base64,' + savedImg;
         dropEl.classList.add('has-image');
         currentImageBase64 = savedImg;
-        currentImageMime   = mimeType;
         document.getElementById('extract-btn').disabled = false;
       }
 
@@ -390,7 +436,7 @@
 
   fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
 
-  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background = 'rgba(0,255,136,0.06)'; });
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background = 'rgba(0,153,255,0.06)'; });
   dropZone.addEventListener('dragleave', () => { dropZone.style.background = ''; });
   dropZone.addEventListener('drop', e => {
     e.preventDefault(); dropZone.style.background = '';
@@ -411,7 +457,6 @@
     previewImg.src = dataUrl;
     dropZone.classList.add('has-image');
     currentImageBase64 = base64;
-    currentImageMime   = mimeType;
     document.getElementById('extract-btn').disabled = false;
 
     try {
@@ -431,7 +476,7 @@
     setTimeout(() => banner.classList.remove('show'), 5000);
   }
 
-  // ── Extension custom event ──
+  // ── Extension থেকে image receive ──
   window.addEventListener('mw_ocr_image_ready', function(event) {
     try {
       const { base64, mime } = event.detail;
@@ -465,96 +510,74 @@
       previewImg.src = dataUrl;
       dropZone.classList.add('has-image');
       currentImageBase64 = dataUrl.split(',')[1];
-      currentImageMime   = file.type || 'image/png';
       document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — click Extract Dates');
-      // Hide rate warn on new image
-      document.getElementById('rate-warn').classList.remove('show');
     };
     reader.readAsDataURL(file);
   }
 
-  // ── Rate limit check helper ──
-  function getRemainingWait() {
-    const elapsed = Date.now() - lastRequestTime;
-    return Math.max(0, MIN_INTERVAL_MS - elapsed);
-  }
-
+  // ════════════════════════════════════════════════════════════
+  // 🔥 Cloudflare Workers AI — Llama 3.2 Vision REST API
+  // Endpoint: POST https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct
+  // Body: { messages: [{role, content: [{type:"image_url",...},{type:"text",...}]}] }
+  // ════════════════════════════════════════════════════════════
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const KEY = localStorage.getItem('mistral_key') || '';
-    if (!KEY) {
-      setStatus('error', '✗ Mistral API Key নেই — উপরে MISTRAL KEY বক্সে দিন');
+    const ACCOUNT_ID = localStorage.getItem('cf_account_id') || '';
+    const API_TOKEN  = localStorage.getItem('cf_api_token')  || '';
+
+    if (!ACCOUNT_ID || !API_TOKEN) {
+      setStatus('error', '✗ Cloudflare Account ID ও API Token দিন — উপরের বক্সে');
       return;
     }
 
-    // Rate limit check
-    const wait = getRemainingWait();
-    if (wait > 0) {
-      const sec = Math.ceil(wait / 1000);
-      document.getElementById('rate-warn').classList.add('show');
-      setStatus('error', `⏳ Rate limit — ${sec}s অপেক্ষা করুন (Mistral: 2 req/min)`);
-      // Auto retry after wait
-      document.getElementById('extract-btn').disabled = true;
-      setTimeout(() => {
-        document.getElementById('extract-btn').disabled = false;
-        document.getElementById('rate-warn').classList.remove('show');
-        setStatus('idle', 'Ready — Extract Dates চাপুন');
-      }, wait);
-      return;
-    }
-
-    setStatus('running', 'Mistral Pixtral-এ পাঠানো হচ্ছে...');
+    setStatus('running', 'Cloudflare Workers AI-তে পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
-    document.getElementById('rate-warn').classList.remove('show');
     const emptyEl = document.getElementById('empty-state');
     if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
 
-    lastRequestTime = Date.now(); // track time
+    const CF_URL = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
 
     try {
-      const resp = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      const resp = await fetch(CF_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${KEY}`
+          'Authorization': `Bearer ${API_TOKEN}`
         },
         body: JSON.stringify({
-          model: 'pixtral-12b-2409',
-          messages: [{
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${currentImageMime};base64,${currentImageBase64}`
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: { url: `data:image/png;base64,${currentImageBase64}` }
+                },
+                {
+                  type: 'text',
+                  text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
                 }
-              },
-              {
-                type: 'text',
-                text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
-              }
-            ]
-          }],
-          temperature: 0,
+              ]
+            }
+          ],
           max_tokens: 1000
         })
       });
 
-      // Handle rate limit HTTP error
-      if (resp.status === 429) {
-        document.getElementById('rate-warn').classList.add('show');
-        throw new Error('Rate limit hit (429) — 30 সেকেন্ড পর আবার চেষ্টা করুন');
+      const data = await resp.json();
+
+      // Cloudflare response format: { result: { response: "..." }, success: true }
+      if (!data.success) {
+        const errMsg = data.errors?.[0]?.message || JSON.stringify(data.errors);
+        throw new Error(errMsg);
       }
 
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-      const rawText = data.choices?.[0]?.message?.content || '';
-      const clean = rawText.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
+      const rawText = data.result?.response || '';
+      const clean   = rawText.replace(/```json|```/g, '').trim();
+      const parsed  = JSON.parse(clean);
 
       extractedDates = parsed.dates || [];
       const validDates = extractedDates.filter(d => !d.blank);
@@ -563,14 +586,14 @@
       document.getElementById('copy-btn').disabled = validDates.length === 0;
       document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-      // Save to localStorage
+      // ── localStorage এ save ──
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
       } catch(e) { console.warn('[MW Extractor] result save failed:', e); }
 
-      // Save to chrome.storage if available
+      // ── chrome.storage.local এ save (FILL button এর জন্য) ──
       try {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.set({
@@ -603,7 +626,7 @@
     label.className = 'section-label';
     const validCount = dates.filter(d => !d.blank).length;
     const blankCount = dates.filter(d => d.blank).length;
-    const blankInfo = blankCount > 0 ? ` · ${blankCount} blank/skipped` : '';
+    const blankInfo  = blankCount > 0 ? ` · ${blankCount} blank/skipped` : '';
     label.textContent = `Year: ${year || '—'} — ${validCount} valid${blankInfo}`;
     area.appendChild(label);
 
@@ -657,7 +680,6 @@
     fileInput.value = '';
     document.getElementById('extract-btn').disabled = true;
     document.getElementById('copy-btn').disabled = true;
-    document.getElementById('rate-warn').classList.remove('show');
     document.getElementById('results-area').innerHTML = `
       <div class="empty-state" id="empty-state">
         <div class="icon">🗓️</div>
