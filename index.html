@@ -41,24 +41,6 @@
   header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
   header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
-  #auto-banner {
-    display: none;
-    padding: 8px 20px;
-    background: rgba(0,255,136,0.08);
-    border-bottom: 1px solid var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--accent);
-    text-align: center;
-    letter-spacing: 0.06em;
-    animation: banner-pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes banner-pulse {
-    0%,100% { background: rgba(0,255,136,0.08); }
-    50%      { background: rgba(0,255,136,0.14); }
-  }
-  #auto-banner.show { display: block; }
-
   main {
     flex: 1;
     display: grid;
@@ -132,35 +114,6 @@
 
   #right-panel { display: flex; flex-direction: column; }
 
-  #key-bar {
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  #key-bar label {
-    color: var(--muted);
-    font-size: 0.7rem;
-    font-family: monospace;
-    white-space: nowrap;
-  }
-
-  #api-key-input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--accent2);
-    font-family: monospace;
-    font-size: 0.72rem;
-    padding: 6px 10px;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  #api-key-input:focus { border-color: var(--accent2); }
-
   #action-bar {
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
@@ -185,19 +138,6 @@
   #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .save-key-btn {
-    background: var(--accent);
-    color: #000;
-    font-family: monospace;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .save-key-btn:hover { filter: brightness(1.1); }
 
   #status {
     padding: 10px 16px;
@@ -250,14 +190,6 @@
   .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
   .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  .raw-box {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 6px; padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem; color: var(--muted);
-    white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
-  }
-
   footer {
     padding: 10px 20px; border-top: 1px solid var(--border);
     font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
@@ -284,14 +216,25 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(0,153,255,0.12);
-    border: 1px solid rgba(0,153,255,0.3);
-    color: var(--accent2);
+    background: rgba(0,255,136,0.12);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     padding: 2px 8px;
     border-radius: 4px;
     margin-left: 8px;
+  }
+
+  .free-badge {
+    background: rgba(255,200,0,0.15);
+    border: 1px solid rgba(255,200,0,0.4);
+    color: #ffc800;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
   }
 </style>
 </head>
@@ -300,26 +243,21 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.0 — Gemini 2.0 Flash · Auto-OCR · Last Result Restored</span>
+  <span>v3.0 — Claude Sonnet · No API Key Needed · Free</span>
 </header>
-
-<div id="auto-banner">
-  ⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...
-</div>
 
 <main>
   <div id="left-panel">
     <div class="panel-header">
       📷 Screenshot / Image
       <span class="badge">DROP or CLICK</span>
-      <span class="badge-blue">AUTO</span>
+      <span class="badge-blue">CTRL+V</span>
     </div>
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="placeholder">
         <div class="icon">🖼️</div>
         <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
         <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
-        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
       </div>
       <img id="preview-img" alt="Screenshot preview" />
     </div>
@@ -329,13 +267,8 @@
   <div id="right-panel">
     <div class="panel-header">
       📋 Extracted Dates
-      <span class="model-badge">🤖 Gemini 2.0 Flash</span>
-    </div>
-
-    <div id="key-bar">
-      <label for="api-key-input">GEMINI KEY:</label>
-      <input id="api-key-input" type="password" placeholder="AIza..." />
-      <button class="save-key-btn" onclick="saveKey()">SAVE</button>
+      <span class="model-badge">🤖 Claude Sonnet</span>
+      <span class="free-badge">FREE</span>
     </div>
 
     <div id="action-bar">
@@ -357,7 +290,7 @@
     </div>
 
     <footer>
-      <span>Powered by Google Gemini 2.0 Flash</span>
+      <span>Powered by Claude Sonnet (Free — no quota issues)</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -370,17 +303,7 @@
   let currentImageMime = 'image/png';
   let extractedDates = [];
 
-  const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('gemini_key') || '';
-
-  function saveKey() {
-    const key = inp.value.trim();
-    if (!key) { showToast('⚠ Key empty!'); return; }
-    localStorage.setItem('gemini_key', key);
-    showToast('✓ Key saved!');
-  }
-
-  // ── Page Load: last result restore ──
+  // Restore last result
   (function restoreLastResult() {
     try {
       const savedDates = localStorage.getItem('mw_ocr_last_dates');
@@ -407,17 +330,14 @@
         renderDates(year, dates);
         document.getElementById('copy-btn').disabled = dates.filter(d => !d.blank).length === 0;
         document.getElementById('count-display').textContent = dates.filter(d => !d.blank).length + ' dates found';
-
         let timeStr = '';
         if (savedTs) {
           const d = new Date(parseInt(savedTs));
           timeStr = ' · ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         }
-        setStatus('done', '✓ Last result restored' + timeStr + ' — নতুন screenshot দিলে update হবে');
+        setStatus('done', '✓ Last result restored' + timeStr);
       }
-    } catch(e) {
-      console.warn('[MW Extractor] restore failed:', e);
-    }
+    } catch(e) {}
   })();
 
   const fileInput  = document.getElementById('file-input');
@@ -440,59 +360,6 @@
     }
   });
 
-  function loadImageFromBase64(base64, mime) {
-    if (!base64) return false;
-    const mimeType = mime || 'image/png';
-    const dataUrl = 'data:' + mimeType + ';base64,' + base64;
-    previewImg.src = dataUrl;
-    dropZone.classList.add('has-image');
-    currentImageBase64 = base64;
-    currentImageMime = mimeType;
-    document.getElementById('extract-btn').disabled = false;
-
-    try {
-      localStorage.setItem('mw_ocr_last_image', base64);
-      localStorage.setItem('mw_ocr_last_mime', mimeType);
-      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
-    } catch(e) {
-      console.warn('[MW Extractor] localStorage save failed:', e);
-    }
-
-    return true;
-  }
-
-  function showAutoBanner(msg) {
-    const banner = document.getElementById('auto-banner');
-    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
-    banner.classList.add('show');
-    setTimeout(() => banner.classList.remove('show'), 5000);
-  }
-
-  window.addEventListener('mw_ocr_image_ready', function(event) {
-    try {
-      const { base64, mime } = event.detail;
-      if (!base64) return;
-      const loaded = loadImageFromBase64(base64, mime || 'image/png');
-      if (!loaded) return;
-      showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
-      setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
-      setTimeout(() => { extractDates(); }, 800);
-    } catch(e) {
-      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
-    }
-  });
-
-  window.addEventListener('message', function(event) {
-    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
-    const base64 = event.data.base64;
-    if (!base64) return;
-    const loaded = loadImageFromBase64(base64, 'image/png');
-    if (!loaded) return;
-    showAutoBanner('⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...');
-    setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
-    setTimeout(() => { extractDates(); }, 800);
-  });
-
   function loadImage(file) {
     const reader = new FileReader();
     reader.onload = ev => {
@@ -504,73 +371,65 @@
       currentImageMime = file.type || 'image/png';
       document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — click Extract Dates');
+      try {
+        localStorage.setItem('mw_ocr_last_image', currentImageBase64);
+        localStorage.setItem('mw_ocr_last_mime', currentImageMime);
+      } catch(e) {}
     };
     reader.readAsDataURL(file);
   }
 
-  // ══════════════════════════════════════════════
-  // 🔥 Gemini 2.0 Flash API Call
-  // ══════════════════════════════════════════════
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const KEY = localStorage.getItem('gemini_key') || '';
-    if (!KEY) {
-      setStatus('error', '✗ Gemini API Key নেই — উপরে GEMINI KEY বক্সে দিন');
-      return;
-    }
-
-    setStatus('running', 'Gemini 2.0 Flash-এ পাঠানো হচ্ছে...');
+    setStatus('running', 'Claude Sonnet-এ পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
     const emptyEl = document.getElementById('empty-state');
     if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
 
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`;
-
     const prompt = `Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}`;
 
-    const requestBody = {
-      contents: [{
-        parts: [
-          {
-            inline_data: {
-              mime_type: currentImageMime || 'image/png',
-              data: currentImageBase64
-            }
-          },
-          {
-            text: prompt
-          }
-        ]
-      }],
-      generationConfig: {
-        temperature: 0,
-        maxOutputTokens: 1024,
-        responseMimeType: "text/plain"
-      }
-    };
-
     try {
-      const resp = await fetch(GEMINI_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: currentImageMime || "image/png",
+                    data: currentImageBase64
+                  }
+                },
+                {
+                  type: "text",
+                  text: prompt
+                }
+              ]
+            }
+          ]
+        })
       });
 
-      if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        const errMsg = errData?.error?.message || `HTTP ${resp.status}`;
-        throw new Error(errMsg);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${response.status}`);
       }
 
-      const data = await resp.json();
+      const data = await response.json();
+      const rawText = data?.content?.map(c => c.text || '').join('') || '';
+      if (!rawText) throw new Error('Claude থেকে কোনো response আসেনি');
 
-      // Gemini response structure: candidates[0].content.parts[0].text
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (!rawText) throw new Error('Gemini থেকে কোনো response আসেনি');
-
-      // JSON parse — markdown backticks strip করো
       const clean = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
       const parsed = JSON.parse(clean);
 
@@ -581,37 +440,16 @@
       document.getElementById('copy-btn').disabled = validDates.length === 0;
       document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-      // Result save
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
       } catch(e) {}
 
-      // chrome.storage.local সাপোর্ট (extension FILL button এর জন্য)
-      try {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          chrome.storage.local.set({
-            mw_ocr_last_dates: extractedDates,
-            mw_ocr_last_year: parsed.year || '',
-            mw_ocr_last_result_ts: Date.now()
-          });
-        }
-      } catch(e) {}
-
     } catch (err) {
       console.error(err);
-      let friendlyMsg = err.message;
-      // Common Gemini errors বাংলায়
-      if (err.message.includes('API_KEY_INVALID') || err.message.includes('API key not valid')) {
-        friendlyMsg = 'API Key ভুল — aistudio.google.com থেকে নতুন key নিন';
-      } else if (err.message.includes('QUOTA_EXCEEDED') || err.message.includes('quota')) {
-        friendlyMsg = 'Quota শেষ — কিছুক্ষণ পর আবার try করুন';
-      } else if (err.message.includes('SAFETY')) {
-        friendlyMsg = 'Image safety filter — অন্য screenshot try করুন';
-      }
-      setStatus('error', '✗ Error: ' + friendlyMsg);
-      document.getElementById('results-area').innerHTML = `<div class="raw-box">Error: ${err.message}</div>`;
+      setStatus('error', '✗ Error: ' + err.message);
+      document.getElementById('results-area').innerHTML = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:monospace;font-size:0.75rem;color:var(--muted);white-space:pre-wrap;">Error: ${err.message}</div>`;
     }
 
     document.getElementById('extract-btn').disabled = false;
