@@ -266,7 +266,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.3 — Debug Mode · Better Error Handling</span>
+  <span>v2.4 — Handwriting OCR Fix · DD.MM.YY</span>
 </header>
 
 <div id="auto-banner">⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...</div>
@@ -520,14 +520,27 @@
     const key   = keys[keyIndex % keys.length];
     const model = localStorage.getItem('or_model') || 'openrouter/auto';
 
-    const PROMPT = `You are a precise OCR assistant. Look at this image carefully.
-Find the "Datum" column (date column). Extract ALL date rows including crossed-out or blank ones.
-For each date row:
-- If it has a date like "23.09.22" → return {num, raw, day, month, blank:false}
-- If the cell is empty or has X or is crossed out → return {num, raw:"X", blank:true}
+    const PROMPT = `You are an expert OCR assistant reading HANDWRITTEN dates from a German medical form (Heilmittelverordnung).
 
-Respond ONLY with a valid JSON object. No markdown. No explanation. No extra text.
-Format: {"year":"2022","dates":[{"num":1,"raw":"02.09.22","day":"02","month":"09","blank":false},{"num":2,"raw":"X","blank":true}]}`;
+CRITICAL: The dates are handwritten in "Datum" column. The format is ALWAYS: DD.MM.YY or DD.MM.YYYY
+- Each date has exactly 3 parts separated by dots: DAY . MONTH . YEAR
+- Examples: "18.10.25" = day 18, month 10, year 25 | "02.02.26" = day 02, month 02, year 26
+- The dots between numbers may look like slashes or be hard to see in handwriting
+- NEVER merge the numbers — always split into day/month/year at the dot separators
+- Row 1 "18.1.25" → day:"18", month:"01", year full:"2025", raw:"18.1.25"
+- Row 2 "2.2.25" → day:"02", month:"02", year full:"2025", raw:"2.2.25"
+- Row 9 "2.2.26" → day:"02", month:"02", year full:"2026", raw:"2.2.26" (NOT "2226"!)
+- Row 10 "5.2.26" → day:"05", month:"02", raw:"5.2.26" (NOT "5.226"!)
+
+RULES:
+- For rows with a handwritten date → {num, raw:"DD.MM.YY", day:"DD", month:"MM", blank:false}
+- For rows with empty cell, X mark, or crossed-out → {num, raw:"X", blank:true}
+- num = row number from 1
+- year = 4-digit year of the MAJORITY of dates in image (e.g. "2026")
+- Always zero-pad day and month to 2 digits in the output
+
+Return ONLY valid JSON. No markdown. No explanation.
+Format: {"year":"2026","dates":[{"num":1,"raw":"18.1.25","day":"18","month":"01","blank":false},{"num":2,"raw":"2.2.25","day":"02","month":"02","blank":false},{"num":7,"raw":"X","blank":true}]}`;
 
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
