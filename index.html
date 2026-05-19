@@ -6,27 +6,38 @@
 <title>MW Date Extractor</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
   :root {
-    --bg: #0a0a0f; --panel: #12121a; --border: #1e1e2e;
-    --accent: #00ff88; --accent2: #0099ff; --text: #e0e0f0;
-    --muted: #555570; --danger: #ff4466; --warn: #ffaa00;
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --border: #1e1e2e;
+    --accent: #00ff88;
+    --accent2: #0099ff;
+    --text: #e0e0f0;
+    --muted: #555570;
+    --danger: #ff4466;
   }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
 
-  header { padding: 18px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--panel); }
+  header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--panel); }
   header .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
   header h1 { font-size: 1rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
-  header span { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
+  header .version { color: var(--muted); font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; margin-left: auto; }
 
-  #auto-banner { display: none; padding: 8px 20px; background: rgba(0,255,136,0.08); border-bottom: 1px solid var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); text-align: center; letter-spacing: 0.06em; }
+  #auto-banner { display: none; padding: 8px 20px; background: rgba(0,255,136,0.08); border-bottom: 1px solid var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); text-align: center; animation: banner-pulse 1.5s ease-in-out infinite; }
+  @keyframes banner-pulse { 0%,100% { background: rgba(0,255,136,0.08); } 50% { background: rgba(0,255,136,0.14); } }
   #auto-banner.show { display: block; }
 
   main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 57px); }
+
   #left-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-  .panel-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 8px; }
-  .badge { background: var(--accent); color: #000; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
-  .badge-blue { background: var(--accent2); color: #fff; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+
+  .panel-header { padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 0.58rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+  .badge-green { background: var(--accent); color: #000; }
+  .badge-blue  { background: var(--accent2); color: #fff; }
 
   #drop-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; cursor: pointer; transition: background 0.2s; position: relative; overflow: hidden; }
   #drop-zone:hover { background: rgba(0,255,136,0.03); }
@@ -40,89 +51,92 @@
   #drop-zone.has-image .placeholder { display: none; }
   #file-input { display: none; }
 
-  #right-panel { display: flex; flex-direction: column; }
-  #key-bar { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  #right-panel { display: flex; flex-direction: column; overflow: hidden; }
+
+  #key-bar { padding: 8px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
   .key-row { display: flex; gap: 6px; align-items: center; }
-  .key-label { color: var(--muted); font-size: 0.65rem; font-family: monospace; white-space: nowrap; width: 52px; }
-  .key-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--accent2); font-family: monospace; font-size: 0.7rem; padding: 5px 8px; border-radius: 4px; outline: none; }
+  .key-label { color: var(--muted); font-size: 0.62rem; font-family: monospace; white-space: nowrap; width: 48px; }
+  .key-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--accent2); font-family: monospace; font-size: 0.68rem; padding: 4px 8px; border-radius: 4px; outline: none; }
   .key-input:focus { border-color: var(--accent2); }
   .key-active { border-color: var(--accent) !important; }
-  #save-keys-btn { background: var(--accent); color: #000; font-family: monospace; font-size: 0.68rem; font-weight: 700; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; align-self: flex-end; }
-  #key-status-line { font-family: monospace; font-size: 0.65rem; color: var(--muted); }
+  #save-keys-btn { background: var(--accent); color: #000; font-family: monospace; font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border: none; border-radius: 4px; cursor: pointer; }
+  #key-status-line { font-family: monospace; font-size: 0.62rem; color: var(--muted); }
 
-  /* Fallback status bar */
-  #fallback-bar { padding: 6px 16px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); display: flex; align-items: center; gap: 8px; min-height: 28px; }
-  #fallback-bar .fb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  #fallback-bar.trying { color: var(--warn); }
-  #fallback-bar.trying .fb-dot { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-  #fallback-bar.ok { color: var(--accent); }
-  #fallback-bar.ok .fb-dot { background: var(--accent); }
-  #fallback-bar.fail { color: var(--danger); }
-  #fallback-bar.fail .fb-dot { background: var(--danger); }
+  #model-bar { padding: 6px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .model-label { color: var(--muted); font-size: 0.62rem; font-family: monospace; white-space: nowrap; }
+  #model-select { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--accent2); font-family: monospace; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
 
-  #action-bar { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
-  button { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; padding: 9px 18px; border: none; border-radius: 5px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.15s; }
-  #extract-btn { background: var(--accent); color: #000; flex: 1; }
-  #extract-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
-  #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #action-bar { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+
+  button { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; font-weight: 700; padding: 8px 14px; border: none; border-radius: 5px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+  #extract-btn { background: var(--accent); color: #000; flex: 1; box-shadow: 0 0 16px rgba(0,255,136,0.2); }
+  #extract-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+  #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
   #clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   #clear-btn:hover { border-color: var(--danger); color: var(--danger); }
   #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  #debug-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); font-size: 0.65rem; padding: 6px 10px; }
-  #debug-btn.active { color: #ffcc00; border-color: #ffcc00; }
 
-  #status { padding: 10px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; min-height: 36px; border-bottom: 1px solid var(--border); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  #status { padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; min-height: 32px; border-bottom: 1px solid var(--border); color: var(--muted); display: flex; align-items: center; gap: 8px; }
   #status.running { color: var(--accent2); }
   #status.done { color: var(--accent); }
   #status.error { color: var(--danger); }
-  .spinner { width: 12px; height: 12px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+
+  .spinner { width: 11px; height: 11px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; flex-shrink: 0; }
   .running .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #results-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  #results-area { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+
   .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center; }
   .empty-state .icon { font-size: 2.5rem; opacity: 0.2; }
-  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-  .date-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; transition: border-color 0.15s; animation: fadeIn 0.2s ease both; }
+
+  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+
+  .date-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; transition: border-color 0.15s; animation: fadeIn 0.22s ease both; }
   .date-item:hover { border-color: var(--accent); }
   @keyframes fadeIn { from { opacity:0; transform: translateX(8px); } to { opacity:1; transform: none; } }
-  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 22px; text-align: right; flex-shrink: 0; }
-  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
-  .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  #debug-panel { display: none; background: #0d0d18; border: 1px solid #ffcc0044; border-radius: 6px; padding: 10px 14px; margin-top: 4px; }
-  #debug-panel.show { display: block; }
-  .debug-title { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: #ffcc00; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.1em; }
-  #debug-raw { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: #aaa; white-space: pre-wrap; line-height: 1.6; max-height: 200px; overflow-y: auto; word-break: break-all; }
-  .raw-box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); white-space: pre-wrap; line-height: 1.7; }
+  .date-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); width: 18px; text-align: right; flex-shrink: 0; }
+  .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); font-weight: 700; flex: 1; }
+  .date-full { font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  footer { padding: 10px 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); display: flex; justify-content: space-between; }
+  .error-box { background: rgba(255,68,102,0.07); border: 1px solid rgba(255,68,102,0.3); border-radius: 6px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #ff8899; white-space: pre-wrap; line-height: 1.7; }
+
+  footer { padding: 7px 16px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
   #count-display { color: var(--accent2); }
+
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--accent); color: #000; padding: 10px 22px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; transition: transform 0.3s; z-index: 999; pointer-events: none; }
   .toast.show { transform: translateX(-50%) translateY(0); }
+
   #results-area::-webkit-scrollbar { width: 4px; }
+  #results-area::-webkit-scrollbar-track { background: transparent; }
   #results-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 <body>
+
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.6 — Auto Fallback · Blank Hidden</span>
+  <span class="version">v3.1 — Handwriting OCR Fixed</span>
 </header>
+
 <div id="auto-banner">⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...</div>
 
 <main>
   <div id="left-panel">
-    <div class="panel-header">📷 Screenshot / Image <span class="badge">DROP or CLICK</span><span class="badge-blue">AUTO</span></div>
+    <div class="panel-header">
+      📷 Screenshot / Image
+      <span class="badge badge-green">DROP or CLICK</span>
+      <span class="badge badge-blue">AUTO</span>
+    </div>
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
       <div class="placeholder">
         <div class="icon">🖼️</div>
-        <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
-        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
-        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
+        <p>Click to upload or<br><strong>drag & drop</strong></p>
+        <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG · Ctrl+V to paste</p>
       </div>
       <img id="preview-img" alt="preview" />
     </div>
@@ -131,75 +145,71 @@
 
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
+
     <div id="key-bar">
-      <div class="key-row"><span class="key-label">KEY 1:</span><input id="key1" class="key-input" type="password" placeholder="sk-or-v1-..." /></div>
-      <div class="key-row"><span class="key-label">KEY 2:</span><input id="key2" class="key-input" type="password" placeholder="sk-or-v1-... (optional)" /></div>
-      <div class="key-row"><span class="key-label">KEY 3:</span><input id="key3" class="key-input" type="password" placeholder="sk-or-v1-... (optional)" /></div>
+      <div class="key-row">
+        <span class="key-label">KEY 1:</span>
+        <input id="key1" class="key-input" type="password" placeholder="sk-or-v1-..." />
+      </div>
+      <div class="key-row">
+        <span class="key-label">KEY 2:</span>
+        <input id="key2" class="key-input" type="password" placeholder="optional" />
+      </div>
+      <div class="key-row">
+        <span class="key-label">KEY 3:</span>
+        <input id="key3" class="key-input" type="password" placeholder="optional" />
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span id="key-status-line">— key loaded</span>
-        <button id="save-keys-btn" onclick="saveKeys()">💾 SAVE KEYS</button>
+        <button id="save-keys-btn" onclick="saveKeys()">💾 SAVE</button>
       </div>
     </div>
 
-    <!-- Fallback status -->
-    <div id="fallback-bar"><div class="fb-dot"></div><span id="fallback-text">Auto-fallback: Qwen → Gemma → Llama → Mistral</span></div>
+    <div id="model-bar">
+      <span class="model-label">🤖 MODEL:</span>
+      <select id="model-select" onchange="saveModel()">
+        <option value="qwen/qwen2.5-vl-72b-instruct:free">Qwen 2.5 VL 72B ⭐ (Best OCR)</option>
+        <option value="qwen/qwen2.5-vl-32b-instruct:free">Qwen 2.5 VL 32B (free)</option>
+        <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (free)</option>
+        <option value="meta-llama/llama-3.2-11b-vision-instruct:free">Llama 3.2 11B (free)</option>
+        <option value="openrouter/auto">Auto Best Available</option>
+      </select>
+    </div>
 
     <div id="action-bar">
       <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
-      <button id="copy-btn" disabled onclick="copyAll()">📋 Copy All</button>
-      <button id="debug-btn" onclick="toggleDebug()">🐛 DEBUG</button>
-      <button id="clear-btn" onclick="clearAll()">✕ Clear</button>
+      <button id="copy-btn" disabled onclick="copyAll()">📋 Copy</button>
+      <button id="clear-btn" onclick="clearAll()">✕</button>
     </div>
 
-    <div id="status"><div class="spinner"></div><span id="status-text">Upload a screenshot to get started</span></div>
-    <div id="results-area">
-      <div class="empty-state" id="empty-state"><div class="icon">🗓️</div><p>Dates will appear here<br>after extraction</p></div>
+    <div id="status">
+      <div class="spinner"></div>
+      <span id="status-text">Upload a screenshot to get started</span>
     </div>
+
+    <div id="results-area">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🗓️</div>
+        <p>Dates will appear here</p>
+      </div>
+    </div>
+
     <footer>
-      <span id="footer-model">Auto-Fallback Mode</span>
+      <span id="footer-model">OpenRouter · Handwriting OCR</span>
       <span id="count-display">—</span>
     </footer>
   </div>
 </main>
+
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Vision-capable free models — tried in order ──────────────
-  // If one fails (no endpoint / rate limit), next is tried automatically
-  const FALLBACK_MODELS = [
-    { id: 'qwen/qwen2.5-vl-32b-instruct:free',           name: 'Qwen 2.5 VL 32B' },
-    { id: 'meta-llama/llama-4-maverick:free',             name: 'Llama 4 Maverick' },
-    { id: 'google/gemma-3-27b-it:free',                   name: 'Gemma 3 27B' },
-    { id: 'meta-llama/llama-3.2-11b-vision-instruct:free',name: 'Llama 3.2 11B' },
-    { id: 'mistralai/mistral-small-3.1-24b-instruct:free',name: 'Mistral Small 3.1' },
-    { id: 'moonshotai/kimi-vl-a3b-thinking:free',         name: 'Kimi VL A3B' },
-  ];
-
   let currentImageBase64 = null;
-  let extractedDates = [];
-  let debugMode = false;
+  let currentImageMime   = 'image/png';
+  let extractedDates     = [];
+  let currentKeyIndex    = 0;
 
-  // ── Debug ────────────────────────────────────────────────────
-  function toggleDebug() {
-    debugMode = !debugMode;
-    document.getElementById('debug-btn').classList.toggle('active', debugMode);
-    document.getElementById('debug-btn').textContent = debugMode ? '🐛 ON' : '🐛 DEBUG';
-    const dp = document.getElementById('debug-panel');
-    if (dp) dp.classList.toggle('show', debugMode);
-  }
-  function showDebug(label, content) {
-    let dp = document.getElementById('debug-panel');
-    if (!dp) {
-      dp = document.createElement('div'); dp.id = 'debug-panel';
-      dp.innerHTML = '<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw"></pre>';
-      document.getElementById('results-area').insertBefore(dp, document.getElementById('results-area').firstChild);
-    }
-    dp.classList.toggle('show', debugMode);
-    const raw = document.getElementById('debug-raw');
-    if (raw) raw.textContent = `[${label}]\n${content}`;
-  }
-
-  // ── Keys ─────────────────────────────────────────────────────
+  // ── Key / Model helpers ───────────────────────────────────────
   function loadKeys() {
     document.getElementById('key1').value = localStorage.getItem('or_key1') || '';
     document.getElementById('key2').value = localStorage.getItem('or_key2') || '';
@@ -207,321 +217,301 @@
     updateKeyStatus();
   }
   function saveKeys() {
-    ['key1','key2','key3'].forEach((id,i) => localStorage.setItem(`or_key${i+1}`, document.getElementById(id).value.trim()));
-    updateKeyStatus(); showToast('✓ Keys saved!');
+    ['key1','key2','key3'].forEach((id,i) =>
+      localStorage.setItem(`or_key${i+1}`, document.getElementById(id).value.trim()));
+    currentKeyIndex = 0;
+    updateKeyStatus();
+    showToast('✓ Keys saved!');
   }
   function getKeys() {
-    return ['or_key1','or_key2','or_key3'].map(k => localStorage.getItem(k)||'').filter(k=>k.length>0);
+    return ['or_key1','or_key2','or_key3'].map(k => localStorage.getItem(k)||'').filter(Boolean);
   }
   function updateKeyStatus() {
     const keys = getKeys();
-    document.getElementById('key-status-line').textContent = `${keys.length} key(s) loaded`;
+    document.getElementById('key-status-line').textContent = `${keys.length} key(s) · Active: KEY ${currentKeyIndex+1}`;
     ['key1','key2','key3'].forEach((id,i) => {
-      document.getElementById(id).classList.toggle('key-active', i === 0 && document.getElementById(id).value.trim().length > 0);
+      document.getElementById(id).classList.toggle('key-active', i===currentKeyIndex && !!document.getElementById(id).value.trim());
     });
   }
-  loadKeys();
 
-  // ── Restore last result ──────────────────────────────────────
-  (function() {
+  function saveModel() {
+    const sel = document.getElementById('model-select');
+    localStorage.setItem('or_model', sel.value);
+    document.getElementById('footer-model').textContent = sel.selectedOptions[0].text;
+  }
+  function loadModel() {
+    const saved = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-72b-instruct:free';
+    const sel = document.getElementById('model-select');
+    if ([...sel.options].some(o=>o.value===saved)) sel.value = saved;
+    document.getElementById('footer-model').textContent = sel.selectedOptions[0]?.text || saved;
+  }
+
+  loadKeys(); loadModel();
+
+  // ── Restore last session ──────────────────────────────────────
+  (function(){
     try {
-      const img = localStorage.getItem('mw_ocr_last_image');
-      const mime = localStorage.getItem('mw_ocr_last_mime') || 'image/png';
-      if (img) {
-        document.getElementById('preview-img').src = 'data:'+mime+';base64,'+img;
-        document.getElementById('drop-zone').classList.add('has-image');
-        currentImageBase64 = img;
-        document.getElementById('extract-btn').disabled = false;
+      const img   = localStorage.getItem('mw_ocr_last_image');
+      const mime  = localStorage.getItem('mw_ocr_last_mime') || 'image/png';
+      const dates = localStorage.getItem('mw_ocr_last_dates');
+      const year  = localStorage.getItem('mw_ocr_last_year');
+      const ts    = localStorage.getItem('mw_ocr_last_result_ts');
+      if (img) { loadBase64(img, mime); }
+      if (dates) {
+        const d = JSON.parse(dates); extractedDates = d;
+        renderDates(year||'', d);
+        document.getElementById('copy-btn').disabled = !d.some(x=>!x.blank);
+        document.getElementById('count-display').textContent = d.filter(x=>!x.blank).length + ' dates found';
+        setStatus('done', '✓ Restored' + (ts ? ' · ' + new Date(+ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ''));
       }
-      const savedDates = localStorage.getItem('mw_ocr_last_dates');
-      const savedYear  = localStorage.getItem('mw_ocr_last_year');
-      if (savedDates) {
-        const dates = JSON.parse(savedDates);
-        extractedDates = dates;
-        renderDates(savedYear||'', dates);
-        const valid = dates.filter(d=>!d.blank);
-        document.getElementById('copy-btn').disabled = valid.length === 0;
-        document.getElementById('count-display').textContent = valid.length + ' dates';
-        const ts = localStorage.getItem('mw_ocr_last_result_ts');
-        const tStr = ts ? ' · ' + new Date(+ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-        setStatus('done', '✓ Last result restored' + tStr);
-      }
-    } catch(e) {}
+    } catch(e){}
   })();
 
-  // ── Image loading ─────────────────────────────────────────────
-  document.getElementById('file-input').addEventListener('change', e => { if(e.target.files[0]) loadImageFile(e.target.files[0]); });
-  const dropZone = document.getElementById('drop-zone');
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background='rgba(0,255,136,0.06)'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.style.background=''; });
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault(); dropZone.style.background='';
+  // ── File loading ──────────────────────────────────────────────
+  document.getElementById('file-input').addEventListener('change', e => { if(e.target.files[0]) loadFile(e.target.files[0]); });
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.background='rgba(0,255,136,0.06)'; });
+  dz.addEventListener('dragleave', () => dz.style.background='');
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.style.background='';
     const f = e.dataTransfer.files[0];
-    if (f && f.type.startsWith('image/')) loadImageFile(f);
+    if (f?.type.startsWith('image/')) loadFile(f);
   });
   document.addEventListener('paste', e => {
     for (const item of e.clipboardData.items)
-      if (item.type.startsWith('image/')) { loadImageFile(item.getAsFile()); break; }
+      if (item.type.startsWith('image/')) { loadFile(item.getAsFile()); break; }
   });
 
-  function loadImageFromBase64(base64, mime) {
-    if (!base64) return false;
-    const mimeType = mime || 'image/png';
-    document.getElementById('preview-img').src = 'data:'+mimeType+';base64,'+base64;
-    document.getElementById('drop-zone').classList.add('has-image');
-    currentImageBase64 = base64;
-    document.getElementById('extract-btn').disabled = false;
-    try { localStorage.setItem('mw_ocr_last_image', base64); localStorage.setItem('mw_ocr_last_mime', mimeType); } catch(e) {}
-    return true;
-  }
   window.addEventListener('mw_ocr_image_ready', e => {
-    try {
-      const {base64, mime} = e.detail;
-      if (!base64 || !loadImageFromBase64(base64, mime||'image/png')) return;
-      document.getElementById('auto-banner').classList.add('show');
-      setTimeout(() => document.getElementById('auto-banner').classList.remove('show'), 5000);
-      setTimeout(() => extractDates(), 800);
-    } catch(e) {}
+    try { const {base64,mime}=e.detail; if(base64){loadBase64(base64,mime||'image/png');showBanner();setTimeout(extractDates,800);} } catch(e){}
   });
   window.addEventListener('message', e => {
-    if (!e.data || e.data.type !== 'MW_OCR_IMAGE' || !e.data.base64) return;
-    if (!loadImageFromBase64(e.data.base64, 'image/png')) return;
-    document.getElementById('auto-banner').classList.add('show');
-    setTimeout(() => document.getElementById('auto-banner').classList.remove('show'), 5000);
-    setTimeout(() => extractDates(), 800);
+    if(e.data?.type==='MW_OCR_IMAGE'&&e.data.base64){loadBase64(e.data.base64,'image/png');showBanner();setTimeout(extractDates,800);}
   });
-  function loadImageFile(file) {
-    const r = new FileReader();
-    r.onload = ev => {
-      const url = ev.target.result;
-      document.getElementById('preview-img').src = url;
-      document.getElementById('drop-zone').classList.add('has-image');
-      currentImageBase64 = url.split(',')[1];
-      document.getElementById('extract-btn').disabled = false;
+
+  function showBanner() {
+    const b=document.getElementById('auto-banner'); b.classList.add('show');
+    setTimeout(()=>b.classList.remove('show'),5000);
+  }
+  function loadBase64(b64, mime) {
+    currentImageBase64=b64; currentImageMime=mime||'image/png';
+    document.getElementById('preview-img').src=`data:${currentImageMime};base64,${b64}`;
+    document.getElementById('drop-zone').classList.add('has-image');
+    document.getElementById('extract-btn').disabled=false;
+    try{localStorage.setItem('mw_ocr_last_image',b64);localStorage.setItem('mw_ocr_last_mime',currentImageMime);}catch(e){}
+  }
+  function loadFile(file) {
+    const r=new FileReader();
+    r.onload=ev=>{
+      const p=ev.target.result.split(',');
+      loadBase64(p[1], p[0].match(/:(.*?);/)[1]);
       setStatus('idle','Image loaded — click Extract Dates');
     };
     r.readAsDataURL(file);
   }
 
-  // ── Fallback bar helpers ──────────────────────────────────────
-  function setFallback(state, text) {
-    const bar = document.getElementById('fallback-bar');
-    bar.className = state; // 'trying' | 'ok' | 'fail' | ''
-    document.getElementById('fallback-text').textContent = text;
-  }
+  // ── THE IMPROVED PROMPT ───────────────────────────────────────
+  const PROMPT = `You are an expert OCR system specialized in reading HANDWRITTEN German medical forms (Heilmittelverordnung).
 
-  // ── Single model API call ─────────────────────────────────────
-  const PROMPT = `OCR expert. Extract handwritten dates from the "Datum" column of this German medical form.
-Format: DD.MM.YY. Dots may look like slashes.
-- Filled row → {num, raw:"DD.MM.YY", day:"DD", month:"MM", blank:false}
-- Empty/X row → {num, raw:"X", blank:true}
-- Zero-pad day and month. year = majority 4-digit year (e.g. "2025" or "2026")
-Return ONLY valid JSON, no markdown:
-{"year":"2025","dates":[{"num":1,"raw":"20.08.25","day":"20","month":"08","blank":false}]}`;
+TASK: Extract ALL dates from the "Datum" column in this image.
 
-  async function tryModel(base64, apiKey, model) {
+IMPORTANT RULES FOR HANDWRITTEN DATES:
+- Dates are handwritten and may look messy, crossed out, or hard to read
+- Common format: DD.MM.YY or DD.MM.YYYY (e.g. "12.10.25" means 12 October 2025)
+- Look very carefully at each handwritten digit — do NOT guess, read exactly what is written
+- If a cell is EMPTY (no writing at all) → blank:true, raw:"X"
+- If a cell has a date that is CROSSED OUT with a line through it → still include the date but note it (blank:false, crossed:true)
+- Do NOT confuse similar digits: 1/7, 3/8, 0/6, 5/6
+
+OUTPUT: Return ONLY valid JSON, no markdown, no explanation:
+{"year":"2025","dates":[{"num":1,"raw":"12.10.25","day":"12","month":"10","blank":false},{"num":2,"raw":"24.11.25","day":"24","month":"11","blank":false,"crossed":true},{"num":7,"raw":"X","blank":true}]}
+
+Read each row carefully from top to bottom. Include ALL rows (filled and empty).`;
+
+  // ── API call ──────────────────────────────────────────────────
+  async function callAPI(b64, mime, keyIdx) {
+    const keys = getKeys();
+    if (!keys.length) throw new Error('API Key নেই! KEY 1 বক্সে দিন।');
+    const key   = keys[keyIdx % keys.length];
+    const model = localStorage.getItem('or_model') || 'qwen/qwen2.5-vl-72b-instruct:free';
+
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${key}`,
         'HTTP-Referer': 'https://mw-date-extractor.local',
         'X-Title': 'MW Date Extractor'
       },
       body: JSON.stringify({
-        model: model.id,
-        messages: [{ role: 'user', content: [
-          { type: 'image_url', image_url: { url: `data:image/png;base64,${base64}` } },
-          { type: 'text', text: PROMPT }
-        ]}],
+        model,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
+            { type: 'text', text: PROMPT }
+          ]
+        }],
         temperature: 0,
-        max_tokens: 600
+        max_tokens: 1500
       })
     });
 
-    const rawText = await resp.text();
-    showDebug(`HTTP ${resp.status} · ${model.name}`, rawText);
-
+    const raw = await resp.text();
     if (!resp.ok) {
       let msg = `HTTP ${resp.status}`;
-      try { msg = JSON.parse(rawText).error?.message || msg; } catch(e) {}
+      try { msg = JSON.parse(raw).error?.message || msg; } catch(e) {}
       throw new Error(msg);
     }
-    const data = JSON.parse(rawText);
+    const data = JSON.parse(raw);
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-    const content = data.choices?.[0]?.message?.content;
-    if (!content || !content.trim()) {
-      const reason = data.choices?.[0]?.finish_reason || 'unknown';
-      throw new Error(`Empty content (finish_reason: ${reason})`);
-    }
+    const content = data.choices?.[0]?.message?.content || '';
+    if (!content.trim()) throw new Error(`Empty response (finish: ${data.choices?.[0]?.finish_reason}). Try another model.`);
     return content;
   }
 
-  // ── Main orchestrator — tries all models × all keys ──────────
+  // ── Extract orchestrator ──────────────────────────────────────
   async function extractDates() {
     if (!currentImageBase64) return;
     const keys = getKeys();
-    if (!keys.length) { setStatus('error','✗ API Key নেই — KEY 1 বক্সে দিন'); return; }
+    if (!keys.length) { setStatus('error','✗ API Key নেই'); return; }
 
     document.getElementById('extract-btn').disabled = true;
     document.getElementById('results-area').innerHTML = '';
-    const oldDp = document.getElementById('debug-panel');
-    if (oldDp) oldDp.remove();
+    let lastErr = null;
 
-    let lastError = null;
-    let tried = 0;
+    for (let attempt = 0; attempt < keys.length; attempt++) {
+      const ki = (currentKeyIndex + attempt) % keys.length;
+      try {
+        setStatus('running', `🔍 হাতের লেখা পড়ছি... (KEY ${ki+1})`);
+        const content = await callAPI(currentImageBase64, currentImageMime, ki);
 
-    // Try each model with each key (model-first, then key rotation)
-    for (const model of FALLBACK_MODELS) {
-      for (let ki = 0; ki < keys.length; ki++) {
-        tried++;
-        setStatus('running', `Trying ${model.name}... (KEY ${ki+1})`);
-        setFallback('trying', `Trying: ${model.name} · KEY ${ki+1}`);
+        // Robust JSON parse
+        let parsed = null;
+        for (const fn of [
+          () => JSON.parse(content),
+          () => JSON.parse(content.match(/\{[\s\S]*\}/)?.[0] ?? ''),
+          () => JSON.parse(content.replace(/```json|```/gi,'').trim()),
+          () => JSON.parse(content.replace(/```json|```/gi,'').match(/\{[\s\S]*\}/)?.[0] ?? '')
+        ]) { try { parsed = fn(); if (parsed) break; } catch(e) {} }
+
+        if (!parsed) throw new Error('JSON parse failed.\n\nRaw response:\n' + content.slice(0,500));
+
+        extractedDates = parsed.dates || [];
+        const valid  = extractedDates.filter(d => !d.blank);
+        const blanks = extractedDates.length - valid.length;
+
+        renderDates(parsed.year, extractedDates);
+        setStatus('done', `✓ ${valid.length}টি তারিখ · ${blanks}টি blank · KEY ${ki+1}`);
+        document.getElementById('copy-btn').disabled = valid.length === 0;
+        document.getElementById('count-display').textContent = `${valid.length} dates`;
+
+        currentKeyIndex = (ki+1) % keys.length;
+        updateKeyStatus();
+
         try {
-          const content = await tryModel(currentImageBase64, keys[ki], model);
+          localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
+          localStorage.setItem('mw_ocr_last_year', parsed.year||'');
+          localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
+        } catch(e) {}
 
-          // Parse JSON robustly
-          let parsed = null;
-          const fns = [
-            () => JSON.parse(content),
-            () => { const m = content.match(/\{[\s\S]*\}/); if(!m) throw 0; return JSON.parse(m[0]); },
-            () => JSON.parse(content.replace(/```json|```/gi,'').trim()),
-            () => { const m = content.replace(/```json|```/gi,'').match(/\{[\s\S]*\}/); if(!m) throw 0; return JSON.parse(m[0]); }
-          ];
-          for (const fn of fns) { try { parsed = fn(); break; } catch(e) {} }
-          if (!parsed) {
-          // Last resort: manually extract key-value pairs if JSON is malformed/truncated
-          const yearMatch = content.match(/"year"\s*:\s*"(\d{4})"/);
-          const datesMatch = content.match(/"dates"\s*:\s*\[([\s\S]*)/);
-          if (yearMatch && datesMatch) {
-            try {
-              // Try to fix truncated JSON by closing it
-              let fixAttempt = '{"year":"' + yearMatch[1] + '","dates":[' + datesMatch[1];
-              // Count open/close braces to close properly
-              let depth = 0, lastGood = 0;
-              for (let i = 0; i < fixAttempt.length; i++) {
-                if (fixAttempt[i] === '{') depth++;
-                if (fixAttempt[i] === '}') { depth--; if (depth === 1) lastGood = i+1; }
-              }
-              fixAttempt = fixAttempt.slice(0, lastGood) + ']}';
-              parsed = JSON.parse(fixAttempt);
-            } catch(e2) {}
-          }
-          if (!parsed) throw new Error('JSON parse error. Raw:\n' + content.slice(0,400));
-        }
+        document.getElementById('extract-btn').disabled = false;
+        return;
 
-          extractedDates = parsed.dates || [];
-          const valid = extractedDates.filter(d=>!d.blank);
-          const blanks = extractedDates.length - valid.length;
-          renderDates(parsed.year, extractedDates);
-
-          setStatus('done', `✓ ${valid.length}টি তারিখ${blanks>0?` (${blanks} blank লুকানো)`:''} · ${model.name}`);
-          setFallback('ok', `✓ ${model.name} · KEY ${ki+1}`);
-          document.getElementById('copy-btn').disabled = valid.length === 0;
-          document.getElementById('count-display').textContent = `${valid.length} dates`;
-          document.getElementById('footer-model').textContent = `Model: ${model.name}`;
-          try {
-            localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
-            localStorage.setItem('mw_ocr_last_year', parsed.year||'');
-            localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
-          } catch(e) {}
-          document.getElementById('extract-btn').disabled = false;
-          return; // ✅ success — stop
-
-        } catch(err) {
-          lastError = err;
-          console.warn(`[MW] ${model.name} KEY${ki+1} failed:`, err.message);
-          // short pause before next attempt
-          await new Promise(r => setTimeout(r, 400));
+      } catch(err) {
+        lastErr = err;
+        if (attempt < keys.length-1) {
+          setStatus('running', `KEY ${ki+1} fail → KEY ${((ki+1)%keys.length)+1} চেষ্টা...`);
+          await new Promise(r => setTimeout(r,800));
         }
       }
     }
 
-    // All models + keys failed
-    const errMsg = lastError?.message || 'Unknown error';
-    setStatus('error', '✗ সব model fail করেছে');
-    setFallback('fail', `সব ${FALLBACK_MODELS.length} model try করা হয়েছে — সব fail`);
+    setStatus('error', '✗ ' + (lastErr?.message||'Unknown').split('\n')[0]);
     document.getElementById('results-area').innerHTML =
-      `<div class="raw-box">❌ সব model fail করেছে।
-
-Last error: ${escHtml(errMsg)}
-
-💡 সমাধান:
-1. ⏳ ৫ মিনিট পর আবার try করুন (rate limit)
-2. 🔑 openrouter.ai থেকে নতুন API key নিন
-3. 💳 Paid credit add করুন openrouter.ai-এ ($1-2 যথেষ্ট)
-4. 🐛 DEBUG চাপুন → raw response দেখুন</div>`;
+      `<div class="error-box">❌ ${escHtml(lastErr?.message||'')}\n\n💡 Tips:\n1. Qwen 2.5 VL 72B বেছে নিন (সবচেয়ে ভালো handwriting OCR)\n2. নতুন key নিন openrouter.ai থেকে\n3. কিছুক্ষণ পর retry করুন</div>`;
     document.getElementById('extract-btn').disabled = false;
   }
 
-  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // ── Render ────────────────────────────────────────────────────
+  const MONTHS = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // ── Render — BLANK ROWS HIDDEN ───────────────────────────────
   function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
-    if (debugMode) {
-      const dp = document.createElement('div'); dp.id='debug-panel'; dp.className='show';
-      dp.innerHTML='<div class="debug-title">🐛 RAW API RESPONSE</div><pre id="debug-raw">—</pre>';
-      area.appendChild(dp);
-    }
     if (!dates?.length) {
-      area.innerHTML += '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
+      area.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p></div>';
       return;
     }
-    const valid = dates.filter(d=>!d.blank);
-    const blanks = dates.length - valid.length;
-    const label = document.createElement('div');
-    label.className = 'section-label';
-    label.textContent = `Year: ${year||'—'} — ${valid.length} dates${blanks>0?` · ${blanks} blank hidden`:''}`;
-    area.appendChild(label);
-    if (!valid.length) {
-      const e = document.createElement('div'); e.className='empty-state';
-      e.innerHTML='<div class="icon">🔍</div><p>কোনো তারিখ পাওয়া যায়নি</p>';
-      area.appendChild(e); return;
-    }
-    const months=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const sorted = [...valid].sort((a,b) => (+a.month*100 + +a.day) - (+b.month*100 + +b.day));
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.textContent = `Year: ${year||'—'} · ${dates.filter(d=>!d.blank).length} valid · ${dates.filter(d=>d.blank).length} blank`;
+    area.appendChild(lbl);
+
+    // Sort: valid first (by date), then blank
+    const sorted = [...dates].sort((a,b) => {
+      if (a.blank && b.blank) return 0;
+      if (a.blank) return 1; if (b.blank) return -1;
+      return (parseInt(a.month)*100+parseInt(a.day)) - (parseInt(b.month)*100+parseInt(b.day));
+    });
+
     sorted.forEach((d, i) => {
-      const item = document.createElement('div');
-      item.className = 'date-item';
-      item.style.animationDelay = `${i*0.03}s`;
-      const mName = months[+d.month] || d.month;
-      item.innerHTML = `<div class="date-num">${d.num}</div><div class="date-value">${escHtml(d.raw||`${d.day}.${d.month}.${(year||'').slice(-2)}`)}</div><div class="date-full">${d.day} ${mName} ${year||''}</div>`;
-      area.appendChild(item);
+      const el = document.createElement('div');
+      el.className = 'date-item';
+      el.style.animationDelay = `${i*0.03}s`;
+
+      if (d.blank) {
+        el.style.opacity = '0.35';
+        el.style.borderColor = 'var(--danger)';
+        el.innerHTML = `<div class="date-num">${d.num}</div>
+          <div class="date-value" style="color:var(--danger);text-decoration:line-through">✕ BLANK</div>
+          <div class="date-full" style="color:var(--danger)">empty</div>`;
+      } else {
+        const mName = MONTHS[parseInt(d.month)] || d.month;
+        const raw   = escHtml(d.raw || `${d.day}.${d.month}`);
+        const crossedStyle = d.crossed ? 'text-decoration:line-through;opacity:0.7' : '';
+        const crossedNote  = d.crossed ? ' <span style="color:var(--danger);font-size:0.6rem">✕crossed</span>' : '';
+        el.innerHTML = `<div class="date-num">${d.num}</div>
+          <div class="date-value" style="${crossedStyle}">${raw}${crossedNote}</div>
+          <div class="date-full">${d.day} ${mName} ${year||''}</div>`;
+      }
+      area.appendChild(el);
     });
   }
 
+  // ── Utils ─────────────────────────────────────────────────────
   function copyAll() {
-    if (!extractedDates.length) return;
     const text = extractedDates.filter(d=>!d.blank).map(d=>d.raw||`${d.day}.${d.month}`).join('\n');
-    navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
+    navigator.clipboard.writeText(text).then(()=>showToast('✓ Copied!'));
   }
 
   function clearAll() {
-    currentImageBase64 = null; extractedDates = [];
+    currentImageBase64=null; extractedDates=[];
     document.getElementById('preview-img').src='';
     document.getElementById('drop-zone').classList.remove('has-image');
     document.getElementById('file-input').value='';
     document.getElementById('extract-btn').disabled=true;
     document.getElementById('copy-btn').disabled=true;
-    document.getElementById('results-area').innerHTML='<div class="empty-state" id="empty-state"><div class="icon">🗓️</div><p>Dates will appear here<br>after extraction</p></div>';
+    document.getElementById('results-area').innerHTML='<div class="empty-state"><div class="icon">🗓️</div><p>Dates will appear here</p></div>';
     document.getElementById('count-display').textContent='—';
     setStatus('idle','Upload a screenshot to get started');
-    setFallback('','Auto-fallback: Qwen → Llama4 → Gemma → Llama3.2 → Mistral → Kimi');
-    try { ['mw_ocr_last_dates','mw_ocr_last_year','mw_ocr_last_result_ts','mw_ocr_last_image','mw_ocr_last_mime'].forEach(k=>localStorage.removeItem(k)); } catch(e) {}
+    try{['mw_ocr_last_dates','mw_ocr_last_year','mw_ocr_last_result_ts','mw_ocr_last_image','mw_ocr_last_mime'].forEach(k=>localStorage.removeItem(k));}catch(e){}
   }
 
   function setStatus(type, msg) {
     const el = document.getElementById('status');
-    el.className = type==='running'?'running':type==='done'?'done':type==='error'?'error':'';
+    el.className = type;
     document.getElementById('status-text').textContent = msg;
   }
+
   function showToast(msg) {
-    const t = document.getElementById('toast');
+    const t=document.getElementById('toast');
     t.textContent=msg; t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'),2000);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 </script>
 </body>
