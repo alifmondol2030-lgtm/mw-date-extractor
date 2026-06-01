@@ -244,7 +244,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.1 — Gemini 2.5 Flash · Auto-OCR · Last Result Restored</span>
+  <span>v2.2 — Gemini 2.5 Flash via OpenRouter · Auto-OCR · Last Result Restored</span>
 </header>
 
 <div id="auto-banner">
@@ -274,8 +274,8 @@
     <div class="panel-header">📋 Extracted Dates</div>
 
     <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GEMINI KEY:</span>
-      <input id="api-key-input" type="password" placeholder="AIza..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">OPENROUTER KEY:</span>
+      <input id="api-key-input" type="password" placeholder="sk-or-v1-..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
       <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
     </div>
 
@@ -298,7 +298,7 @@
     </div>
 
     <footer>
-      <span>Powered by Gemini 2.5 Flash</span>
+      <span>Powered by Gemini 2.5 Flash via OpenRouter</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -312,10 +312,10 @@
   let extractedDates = [];
 
   const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('gemini_key') || '';
+  inp.value = localStorage.getItem('openrouter_key') || '';
 
   function saveKey() {
-    localStorage.setItem('gemini_key', inp.value.trim());
+    localStorage.setItem('openrouter_key', inp.value.trim());
     showToast('Key saved!');
   }
 
@@ -379,7 +379,6 @@
     }
   });
 
-  // ── Extension custom event ──
   window.addEventListener('mw_ocr_image_ready', function(event) {
     try {
       const { base64, mime } = event.detail;
@@ -389,12 +388,9 @@
       showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
       setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
       setTimeout(() => { extractDates(); }, 800);
-    } catch(e) {
-      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
-    }
+    } catch(e) {}
   });
 
-  // ── postMessage fallback ──
   window.addEventListener('message', function(event) {
     if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
     const base64 = event.data.base64;
@@ -444,49 +440,51 @@
   }
 
   // ════════════════════════════════════════════════
-  // 🔥 GEMINI API — extractDates()
-  // Model: gemini-2.5-flash (updated from 2.0-flash)
+  // 🔥 OpenRouter API — Gemini 2.5 Flash
   // ════════════════════════════════════════════════
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const KEY = localStorage.getItem('gemini_key') || '';
+    const KEY = localStorage.getItem('openrouter_key') || '';
     if (!KEY) {
-      setStatus('error', '✗ Gemini API Key নেই — উপরে GEMINI KEY বক্সে দিন');
+      setStatus('error', '✗ OpenRouter Key নেই — উপরে OPENROUTER KEY বক্সে দিন');
       return;
     }
 
-    setStatus('running', 'Gemini AI-তে পাঠানো হচ্ছে...');
+    setStatus('running', 'Gemini 2.5 Flash (OpenRouter)-এ পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
     const emptyEl = document.getElementById('empty-state');
     if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      // ✅ Updated: gemini-2.5-flash (gemini-2.0-flash retired March 2026)
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${KEY}`;
-
-      const resp = await fetch(endpoint, {
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + KEY,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'MW Date Extractor'
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [
+          model: 'google/gemini-2.5-flash',
+          messages: [{
+            role: 'user',
+            content: [
               {
-                inlineData: {
-                  mimeType: currentImageMime || 'image/png',
-                  data: currentImageBase64
+                type: 'image_url',
+                image_url: {
+                  url: 'data:' + (currentImageMime || 'image/png') + ';base64,' + currentImageBase64
                 }
               },
               {
+                type: 'text',
                 text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
               }
             ]
           }],
-          generationConfig: {
-            temperature: 0,
-            maxOutputTokens: 1000
-          }
+          max_tokens: 1000,
+          temperature: 0
         })
       });
 
@@ -494,7 +492,7 @@
 
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const rawText = data.choices?.[0]?.message?.content || '';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
@@ -509,16 +507,6 @@
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
-      } catch(e) {}
-
-      try {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          chrome.storage.local.set({
-            mw_ocr_last_dates: extractedDates,
-            mw_ocr_last_year: parsed.year || '',
-            mw_ocr_last_result_ts: Date.now()
-          });
-        }
       } catch(e) {}
 
     } catch (err) {
