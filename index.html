@@ -85,8 +85,22 @@
     align-items: center;
     gap: 8px;
   }
-  .panel-header .badge { background: var(--accent); color: #000; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
-  .panel-header .badge-blue { background: var(--accent2); color: #fff; font-size: 0.6rem; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+  .panel-header .badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .panel-header .badge-blue {
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
 
   #drop-zone {
     flex: 1;
@@ -102,11 +116,16 @@
   }
   #drop-zone:hover { background: rgba(0,255,136,0.03); }
   #drop-zone.has-image { justify-content: flex-start; padding: 0; }
+
   #drop-zone .placeholder { text-align: center; pointer-events: none; }
   #drop-zone .placeholder .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
   #drop-zone .placeholder p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
   #drop-zone .placeholder p strong { color: var(--accent); }
-  #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; padding: 12px; }
+
+  #preview-img {
+    width: 100%; height: 100%;
+    object-fit: contain; display: none; padding: 12px;
+  }
   #drop-zone.has-image #preview-img { display: block; }
   #drop-zone.has-image .placeholder { display: none; }
   #file-input { display: none; }
@@ -130,8 +149,10 @@
   #extract-btn { background: var(--accent); color: #000; flex: 1; }
   #extract-btn:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
   #extract-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   #clear-btn { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   #clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
   #copy-btn { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
   #copy-btn:hover { background: var(--accent2); color: #000; }
   #copy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -147,7 +168,11 @@
   #status.done { color: var(--accent); }
   #status.error { color: var(--danger); }
 
-  .spinner { width: 12px; height: 12px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid transparent; border-top-color: currentColor;
+    border-radius: 50%; animation: spin 0.6s linear infinite; display: none;
+  }
   .running .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -156,10 +181,19 @@
     display: flex; flex-direction: column; gap: 8px;
   }
 
-  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center; }
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--muted); font-size: 0.8rem; gap: 10px; text-align: center;
+  }
   .empty-state .icon { font-size: 2.5rem; opacity: 0.2; }
 
-  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
 
   .date-item {
     display: flex; align-items: center; gap: 12px;
@@ -174,12 +208,30 @@
   .date-value { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--accent); font-weight: 700; flex: 1; }
   .date-full { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
 
-  .raw-box { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); white-space: pre-wrap; line-height: 1.7; margin-top: 8px; }
+  .raw-box {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; color: var(--muted);
+    white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
+  }
 
-  footer { padding: 10px 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--muted); display: flex; justify-content: space-between; }
+  footer {
+    padding: 10px 20px; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); display: flex; justify-content: space-between;
+  }
   #count-display { color: var(--accent2); }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--accent); color: #000; padding: 10px 22px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700; transition: transform 0.3s; z-index: 999; pointer-events: none; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--accent); color: #000;
+    padding: 10px 22px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 700;
+    transition: transform 0.3s; z-index: 999; pointer-events: none;
+  }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   #results-area::-webkit-scrollbar { width: 4px; }
@@ -192,10 +244,12 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.0 — OCR.space API · Auto-OCR</span>
+  <span>v2.0 — Gemini 2.0 Flash · Auto-OCR · Last Result Restored</span>
 </header>
 
-<div id="auto-banner">⚡ ছবি পেয়েছি — Auto Extracting...</div>
+<div id="auto-banner">
+  ⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...
+</div>
 
 <main>
   <div id="left-panel">
@@ -209,14 +263,21 @@
         <div class="icon">🖼️</div>
         <p>Click to upload or<br><strong>drag & drop</strong> screenshot here</p>
         <p style="margin-top:8px;font-size:0.75rem;">PNG, JPG supported · Ctrl+V to paste</p>
+        <p style="margin-top:6px;font-size:0.72rem;color:#00ff88;">✓ MW Extension থেকেও auto-receive হবে</p>
       </div>
-      <img id="preview-img" alt="preview" />
+      <img id="preview-img" alt="Screenshot preview" />
     </div>
     <input type="file" id="file-input" accept="image/*">
   </div>
 
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
+
+    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
+      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">GEMINI KEY:</span>
+      <input id="api-key-input" type="password" placeholder="AIza..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
+      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    </div>
 
     <div id="action-bar">
       <button id="extract-btn" disabled onclick="extractDates()">⚡ Extract Dates</button>
@@ -237,7 +298,7 @@
     </div>
 
     <footer>
-      <span>Powered by OCR.space API</span>
+      <span>Powered by Gemini 2.0 Flash</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -246,32 +307,56 @@
 <div class="toast" id="toast">✓ Copied!</div>
 
 <script>
-  const OCR_KEY = 'K89627863688957';
   let currentImageBase64 = null;
-  let currentMime = 'image/png';
+  let currentImageMime = 'image/png';
   let extractedDates = [];
 
-  // ── Restore last result ──
-  (function restore() {
+  const inp = document.getElementById('api-key-input');
+  inp.value = localStorage.getItem('gemini_key') || '';
+
+  function saveKey() {
+    localStorage.setItem('gemini_key', inp.value.trim());
+    showToast('Key saved!');
+  }
+
+  // ── Page Load: last result restore ──
+  (function restoreLastResult() {
     try {
-      const img  = localStorage.getItem('mw_ocr_last_image');
-      const mime = localStorage.getItem('mw_ocr_last_mime') || 'image/png';
-      if (img) {
-        previewImg.src = 'data:' + mime + ';base64,' + img;
-        dropZone.classList.add('has-image');
-        currentImageBase64 = img;
-        currentMime = mime;
+      const savedDates = localStorage.getItem('mw_ocr_last_dates');
+      const savedYear  = localStorage.getItem('mw_ocr_last_year');
+      const savedTs    = localStorage.getItem('mw_ocr_last_result_ts');
+      const savedImg   = localStorage.getItem('mw_ocr_last_image');
+      const savedMime  = localStorage.getItem('mw_ocr_last_mime');
+
+      if (savedImg) {
+        const previewEl = document.getElementById('preview-img');
+        const dropEl    = document.getElementById('drop-zone');
+        const mimeType  = savedMime || 'image/png';
+        previewEl.src = 'data:' + mimeType + ';base64,' + savedImg;
+        dropEl.classList.add('has-image');
+        currentImageBase64 = savedImg;
+        currentImageMime = mimeType;
         document.getElementById('extract-btn').disabled = false;
       }
-      const saved = localStorage.getItem('mw_ocr_last_dates');
-      if (saved) {
-        extractedDates = JSON.parse(saved);
-        renderDates(extractedDates);
-        document.getElementById('copy-btn').disabled = false;
-        document.getElementById('count-display').textContent = extractedDates.length + ' dates found';
-        setStatus('done', '✓ Last result restored — নতুন screenshot দিলে update হবে');
+
+      if (savedDates) {
+        const dates = JSON.parse(savedDates);
+        const year  = savedYear || '';
+        extractedDates = dates;
+        renderDates(year, dates);
+        document.getElementById('copy-btn').disabled = dates.length === 0;
+        document.getElementById('count-display').textContent = dates.length + ' dates found';
+
+        let timeStr = '';
+        if (savedTs) {
+          const d = new Date(parseInt(savedTs));
+          timeStr = ' · ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        setStatus('done', '✓ Last result restored' + timeStr + ' — নতুন screenshot দিলে update হবে');
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('[MW Extractor] restore failed:', e);
+    }
   })();
 
   const fileInput  = document.getElementById('file-input');
@@ -279,113 +364,168 @@
   const previewImg = document.getElementById('preview-img');
 
   fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
-  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background='rgba(0,255,136,0.06)'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.style.background=''; });
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.background = 'rgba(0,255,136,0.06)'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.style.background = ''; });
   dropZone.addEventListener('drop', e => {
-    e.preventDefault(); dropZone.style.background='';
+    e.preventDefault(); dropZone.style.background = '';
     const f = e.dataTransfer.files[0];
     if (f && f.type.startsWith('image/')) loadImage(f);
   });
+
   document.addEventListener('paste', e => {
     for (const item of e.clipboardData.items) {
       if (item.type.startsWith('image/')) { loadImage(item.getAsFile()); break; }
     }
   });
 
-  // Extension থেকে image receive
-  window.addEventListener('mw_ocr_image_ready', function(e) {
-    const { base64, mime } = e.detail;
-    if (!base64) return;
-    loadImageFromBase64(base64, mime || 'image/png');
-    document.getElementById('auto-banner').classList.add('show');
-    setTimeout(() => document.getElementById('auto-banner').classList.remove('show'), 5000);
-    setTimeout(() => extractDates(), 800);
+  // ── Extension custom event ──
+  window.addEventListener('mw_ocr_image_ready', function(event) {
+    try {
+      const { base64, mime } = event.detail;
+      if (!base64) return;
+      const loaded = loadImageFromBase64(base64, mime || 'image/png');
+      if (!loaded) return;
+      showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
+      setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+      setTimeout(() => { extractDates(); }, 800);
+    } catch(e) {
+      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
+    }
   });
 
-  window.addEventListener('message', function(e) {
-    if (!e.data || e.data.type !== 'MW_OCR_IMAGE') return;
-    loadImageFromBase64(e.data.base64, 'image/png');
-    setTimeout(() => extractDates(), 800);
+  // ── postMessage fallback ──
+  window.addEventListener('message', function(event) {
+    if (!event.data || event.data.type !== 'MW_OCR_IMAGE') return;
+    const base64 = event.data.base64;
+    if (!base64) return;
+    const loaded = loadImageFromBase64(base64, 'image/png');
+    if (!loaded) return;
+    showAutoBanner('⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...');
+    setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
+    setTimeout(() => { extractDates(); }, 800);
   });
 
   function loadImageFromBase64(base64, mime) {
-    currentImageBase64 = base64;
-    currentMime = mime || 'image/png';
-    previewImg.src = 'data:' + currentMime + ';base64,' + base64;
+    if (!base64) return false;
+    const mimeType = mime || 'image/png';
+    previewImg.src = 'data:' + mimeType + ';base64,' + base64;
     dropZone.classList.add('has-image');
+    currentImageBase64 = base64;
+    currentImageMime = mimeType;
     document.getElementById('extract-btn').disabled = false;
     try {
       localStorage.setItem('mw_ocr_last_image', base64);
-      localStorage.setItem('mw_ocr_last_mime', currentMime);
+      localStorage.setItem('mw_ocr_last_mime', mimeType);
+      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
     } catch(e) {}
+    return true;
+  }
+
+  function showAutoBanner(msg) {
+    const banner = document.getElementById('auto-banner');
+    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
   }
 
   function loadImage(file) {
     const reader = new FileReader();
     reader.onload = ev => {
       const dataUrl = ev.target.result;
-      const base64 = dataUrl.split(',')[1];
-      const mime = file.type || 'image/png';
-      loadImageFromBase64(base64, mime);
+      previewImg.src = dataUrl;
+      dropZone.classList.add('has-image');
+      currentImageBase64 = dataUrl.split(',')[1];
+      currentImageMime = file.type || 'image/png';
+      document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — click Extract Dates');
     };
     reader.readAsDataURL(file);
   }
 
+  // ════════════════════════════════════════════════
+  // 🔥 GEMINI API — extractDates()
+  // Endpoint: generativelanguage.googleapis.com
+  // Model: gemini-2.0-flash
+  // ════════════════════════════════════════════════
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    setStatus('running', 'OCR.space এ পাঠানো হচ্ছে...');
+    const KEY = localStorage.getItem('gemini_key') || '';
+    if (!KEY) {
+      setStatus('error', '✗ Gemini API Key নেই — উপরে GEMINI KEY বক্সে দিন');
+      return;
+    }
+
+    setStatus('running', 'Gemini AI-তে পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      // ── Step 1: OCR.space দিয়ে text extract ──
-      const formData = new FormData();
-      formData.append('apikey', OCR_KEY);
-      formData.append('language', 'ger'); // German (Datum column)
-      formData.append('isOverlayRequired', 'false');
-      formData.append('detectOrientation', 'true');
-      formData.append('scale', 'true');
-      formData.append('OCREngine', '2');
+      // Gemini API endpoint
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`;
 
-      // Base64 থেকে Blob বানাও
-      const byteChars = atob(currentImageBase64);
-      const byteNums  = new Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([new Uint8Array(byteNums)], { type: currentMime });
-      formData.append('file', blob, 'image.png');
-
-      setStatus('running', 'OCR চলছে...');
-
-      const ocrResp = await fetch('https://api.ocr.space/parse/image', {
+      const resp = await fetch(endpoint, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                // Image part — Gemini uses inlineData
+                inlineData: {
+                  mimeType: currentImageMime || 'image/png',
+                  data: currentImageBase64
+                }
+              },
+              {
+                // Text prompt
+                text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 1000
+          }
+        })
       });
 
-      const ocrData = await ocrResp.json();
+      const data = await resp.json();
 
-      if (ocrData.IsErroredOnProcessing) {
-        throw new Error(ocrData.ErrorMessage || 'OCR failed');
-      }
+      // Gemini error check
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      const rawText = ocrData.ParsedResults?.[0]?.ParsedText || '';
-      if (!rawText.trim()) throw new Error('OCR কোনো text পায়নি');
+      // Gemini response structure: data.candidates[0].content.parts[0].text
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
 
-      setStatus('running', 'Date খুঁজছি...');
+      extractedDates = parsed.dates || [];
+      const validDates = extractedDates.filter(d => !d.blank);
+      renderDates(parsed.year, extractedDates);
+      setStatus('done', `✓ ${validDates.length}টি তারিখ পাওয়া গেছে${extractedDates.length - validDates.length > 0 ? ` (${extractedDates.length - validDates.length}টি blank/skip)` : ''}`);
+      document.getElementById('copy-btn').disabled = validDates.length === 0;
+      document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-      // ── Step 2: Text থেকে date extract ──
-      const dates = parseDatesFromText(rawText);
-
-      extractedDates = dates;
-      renderDates(dates);
-      setStatus('done', `✓ ${dates.length}টি তারিখ পাওয়া গেছে`);
-      document.getElementById('copy-btn').disabled = dates.length === 0;
-      document.getElementById('count-display').textContent = dates.length + ' dates found';
-
+      // localStorage এ save
       try {
-        localStorage.setItem('mw_ocr_last_dates', JSON.stringify(dates));
+        localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
+        localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
+      } catch(e) {}
+
+      // chrome.storage.local এও save (FILL button এর জন্য)
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({
+            mw_ocr_last_dates: extractedDates,
+            mw_ocr_last_year: parsed.year || '',
+            mw_ocr_last_result_ts: Date.now()
+          });
+        }
       } catch(e) {}
 
     } catch (err) {
@@ -397,36 +537,7 @@
     document.getElementById('extract-btn').disabled = false;
   }
 
-  function parseDatesFromText(text) {
-    const dates = [];
-    // DD.MM.YY বা DD.MM.YYYY format match করো
-    const regex = /\b(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{2,4})\b/g;
-    let match;
-    let num = 1;
-    const seen = new Set();
-
-    while ((match = regex.exec(text)) !== null) {
-      const raw = match[0];
-      const day = match[1].padStart(2,'0');
-      const mon = match[2].padStart(2,'0');
-      let year = match[3];
-      if (year.length === 2) year = '20' + year;
-
-      // Duplicate skip
-      if (seen.has(raw)) continue;
-
-      // Valid date check
-      const d = parseInt(day), m = parseInt(mon);
-      if (d < 1 || d > 31 || m < 1 || m > 12) continue;
-
-      seen.add(raw);
-      dates.push({ num: num++, raw, day, month: mon, year });
-    }
-
-    return dates;
-  }
-
-  function renderDates(dates) {
+  function renderDates(year, dates) {
     const area = document.getElementById('results-area');
     area.innerHTML = '';
 
@@ -437,28 +548,51 @@
 
     const label = document.createElement('div');
     label.className = 'section-label';
-    label.textContent = dates.length + ' dates found';
+    const validCount = dates.filter(d => !d.blank).length;
+    const blankCount = dates.filter(d => d.blank).length;
+    const blankInfo = blankCount > 0 ? ` · ${blankCount} blank/skipped` : '';
+    label.textContent = `Year: ${year || '—'} — ${validCount} valid${blankInfo}`;
     area.appendChild(label);
 
     const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    dates.forEach((d, i) => {
+    const sorted = [...dates].sort((a, b) => {
+      if (a.blank && b.blank) return 0;
+      if (a.blank) return 1;
+      if (b.blank) return -1;
+      const aVal = parseInt(a.month) * 100 + parseInt(a.day);
+      const bVal = parseInt(b.month) * 100 + parseInt(b.day);
+      return aVal - bVal;
+    });
+
+    sorted.forEach((d, i) => {
       const item = document.createElement('div');
       item.className = 'date-item';
       item.style.animationDelay = `${i * 0.04}s`;
-      const mName = monthNames[parseInt(d.month)] || d.month;
-      item.innerHTML = `
-        <div class="date-num">${d.num}</div>
-        <div class="date-value">${d.raw}</div>
-        <div class="date-full">${d.day} ${mName} ${d.year}</div>
-      `;
+
+      if (d.blank) {
+        item.style.opacity = '0.45';
+        item.style.borderColor = 'var(--danger)';
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value" style="color:var(--danger);text-decoration:line-through;">✕ BLANK</div>
+          <div class="date-full" style="color:var(--danger);">skip · not filled</div>
+        `;
+      } else {
+        const mName = monthNames[parseInt(d.month)] || d.month;
+        item.innerHTML = `
+          <div class="date-num">${d.num}</div>
+          <div class="date-value">${d.raw || `${d.day}.${d.month}.${(year||'').slice(-2)}`}</div>
+          <div class="date-full">${d.day} ${mName} ${year || ''}</div>
+        `;
+      }
       area.appendChild(item);
     });
   }
 
   function copyAll() {
     if (!extractedDates.length) return;
-    const text = extractedDates.map(d => d.raw).join('\n');
+    const text = extractedDates.filter(d => !d.blank).map(d => d.raw || `${d.day}.${d.month}`).join('\n');
     navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!'));
   }
 
@@ -470,11 +604,19 @@
     fileInput.value = '';
     document.getElementById('extract-btn').disabled = true;
     document.getElementById('copy-btn').disabled = true;
-    document.getElementById('results-area').innerHTML = `<div class="empty-state" id="empty-state"><div class="icon">🗓️</div><p>Dates will appear here<br>after extraction</p></div>`;
+    document.getElementById('results-area').innerHTML = `
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🗓️</div>
+        <p>Dates will appear here<br>after extraction</p>
+      </div>`;
     document.getElementById('count-display').textContent = '—';
     setStatus('idle', 'Upload a screenshot to get started');
     try {
-      ['mw_ocr_last_dates','mw_ocr_last_result_ts','mw_ocr_last_image','mw_ocr_last_mime'].forEach(k => localStorage.removeItem(k));
+      localStorage.removeItem('mw_ocr_last_dates');
+      localStorage.removeItem('mw_ocr_last_year');
+      localStorage.removeItem('mw_ocr_last_result_ts');
+      localStorage.removeItem('mw_ocr_last_image');
+      localStorage.removeItem('mw_ocr_last_mime');
     } catch(e) {}
   }
 
