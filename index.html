@@ -244,7 +244,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.0 — Gemini 2.0 Flash · Auto-OCR · Last Result Restored</span>
+  <span>v2.1 — Gemini 2.5 Flash · Auto-OCR · Last Result Restored</span>
 </header>
 
 <div id="auto-banner">
@@ -298,7 +298,7 @@
     </div>
 
     <footer>
-      <span>Powered by Gemini 2.0 Flash</span>
+      <span>Powered by Gemini 2.5 Flash</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -445,8 +445,7 @@
 
   // ════════════════════════════════════════════════
   // 🔥 GEMINI API — extractDates()
-  // Endpoint: generativelanguage.googleapis.com
-  // Model: gemini-2.0-flash
+  // Model: gemini-2.5-flash (updated from 2.0-flash)
   // ════════════════════════════════════════════════
   async function extractDates() {
     if (!currentImageBase64) return;
@@ -464,8 +463,8 @@
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      // Gemini API endpoint
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`;
+      // ✅ Updated: gemini-2.5-flash (gemini-2.0-flash retired March 2026)
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${KEY}`;
 
       const resp = await fetch(endpoint, {
         method: 'POST',
@@ -474,14 +473,12 @@
           contents: [{
             parts: [
               {
-                // Image part — Gemini uses inlineData
                 inlineData: {
                   mimeType: currentImageMime || 'image/png',
                   data: currentImageBase64
                 }
               },
               {
-                // Text prompt
                 text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
               }
             ]
@@ -495,10 +492,8 @@
 
       const data = await resp.json();
 
-      // Gemini error check
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      // Gemini response structure: data.candidates[0].content.parts[0].text
       const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
@@ -510,14 +505,12 @@
       document.getElementById('copy-btn').disabled = validDates.length === 0;
       document.getElementById('count-display').textContent = `${validDates.length} dates found`;
 
-      // localStorage এ save
       try {
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
       } catch(e) {}
 
-      // chrome.storage.local এও save (FILL button এর জন্য)
       try {
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.set({
