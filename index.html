@@ -216,6 +216,49 @@
     white-space: pre-wrap; line-height: 1.7; margin-top: 8px;
   }
 
+  /* API Key setup box */
+  #key-bar {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  #key-bar .key-label {
+    color: var(--muted); font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  #api-key-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #api-key-input:focus { border-color: var(--accent2); }
+  #api-key-input::placeholder { color: var(--muted); }
+
+  /* How to get key hint */
+  #key-hint {
+    padding: 6px 16px 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #key-hint a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  #key-hint a:hover { text-decoration: underline; }
+
   footer {
     padding: 10px 20px; border-top: 1px solid var(--border);
     font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
@@ -244,7 +287,7 @@
 <header>
   <div class="dot"></div>
   <h1>MW Date Extractor</h1>
-  <span>v2.2 — Gemini 2.5 Flash via OpenRouter · Auto-OCR · Last Result Restored</span>
+  <span>v2.0 — Gemini 2.5 Flash (Google AI Studio) · Auto-OCR · Last Result Restored</span>
 </header>
 
 <div id="auto-banner">
@@ -273,10 +316,18 @@
   <div id="right-panel">
     <div class="panel-header">📋 Extracted Dates</div>
 
-    <div id="key-bar" style="padding:8px 16px;border-bottom:1px solid #1e1e2e;display:flex;gap:8px;align-items:center;">
-      <span style="color:#555570;font-size:0.7rem;font-family:monospace;white-space:nowrap">OPENROUTER KEY:</span>
-      <input id="api-key-input" type="password" placeholder="sk-or-v1-..." style="flex:1;background:#0a0a0f;border:1px solid #1e1e2e;color:#0099ff;font-family:monospace;font-size:0.72rem;padding:6px 10px;border-radius:4px;outline:none;" />
-      <button onclick="saveKey()" style="background:#00ff88;color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    <!-- Google AI Studio API Key Input -->
+    <div id="key-bar">
+      <span class="key-label">GEMINI KEY:</span>
+      <input id="api-key-input" type="password" placeholder="AIza..." />
+      <button onclick="saveKey()" style="background:var(--accent);color:#000;font-family:monospace;font-size:0.7rem;font-weight:700;padding:6px 12px;border:none;border-radius:4px;cursor:pointer;">SAVE</button>
+    </div>
+
+    <!-- How to get key hint -->
+    <div id="key-hint">
+      🔑 Free key নিন:
+      <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>
+      &nbsp;→ "Get API Key" → Copy করুন → উপরে paste করুন
     </div>
 
     <div id="action-bar">
@@ -298,7 +349,7 @@
     </div>
 
     <footer>
-      <span>Powered by Gemini 2.5 Flash via OpenRouter</span>
+      <span>Powered by Gemini 2.5 Flash · Google AI Studio · Free 1500/day</span>
       <span id="count-display">—</span>
     </footer>
   </div>
@@ -308,15 +359,14 @@
 
 <script>
   let currentImageBase64 = null;
-  let currentImageMime = 'image/png';
   let extractedDates = [];
 
   const inp = document.getElementById('api-key-input');
-  inp.value = localStorage.getItem('openrouter_key') || '';
+  inp.value = localStorage.getItem('gemini_key') || '';
 
   function saveKey() {
-    localStorage.setItem('openrouter_key', inp.value.trim());
-    showToast('Key saved!');
+    localStorage.setItem('gemini_key', inp.value.trim());
+    showToast('Key saved! ✓');
   }
 
   // ── Page Load: last result restore ──
@@ -335,7 +385,6 @@
         previewEl.src = 'data:' + mimeType + ';base64,' + savedImg;
         dropEl.classList.add('has-image');
         currentImageBase64 = savedImg;
-        currentImageMime = mimeType;
         document.getElementById('extract-btn').disabled = false;
       }
 
@@ -379,6 +428,32 @@
     }
   });
 
+  function loadImageFromBase64(base64, mime) {
+    if (!base64) return false;
+    const mimeType = mime || 'image/png';
+    const dataUrl = 'data:' + mimeType + ';base64,' + base64;
+    previewImg.src = dataUrl;
+    dropZone.classList.add('has-image');
+    currentImageBase64 = base64;
+    document.getElementById('extract-btn').disabled = false;
+
+    try {
+      localStorage.setItem('mw_ocr_last_image', base64);
+      localStorage.setItem('mw_ocr_last_mime', mimeType);
+      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
+    } catch(e) {
+      console.warn('[MW Extractor] localStorage save failed:', e);
+    }
+    return true;
+  }
+
+  function showAutoBanner(msg) {
+    const banner = document.getElementById('auto-banner');
+    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 5000);
+  }
+
   window.addEventListener('mw_ocr_image_ready', function(event) {
     try {
       const { base64, mime } = event.detail;
@@ -388,7 +463,9 @@
       showAutoBanner('⚡ Extension থেকে Image পেয়েছি — Auto Extracting...');
       setStatus('idle', '📸 Extension থেকে ছবি পেয়েছি — Auto extract শুরু হচ্ছে...');
       setTimeout(() => { extractDates(); }, 800);
-    } catch(e) {}
+    } catch(e) {
+      console.warn('[MW Extractor] mw_ocr_image_ready error:', e);
+    }
   });
 
   window.addEventListener('message', function(event) {
@@ -402,29 +479,6 @@
     setTimeout(() => { extractDates(); }, 800);
   });
 
-  function loadImageFromBase64(base64, mime) {
-    if (!base64) return false;
-    const mimeType = mime || 'image/png';
-    previewImg.src = 'data:' + mimeType + ';base64,' + base64;
-    dropZone.classList.add('has-image');
-    currentImageBase64 = base64;
-    currentImageMime = mimeType;
-    document.getElementById('extract-btn').disabled = false;
-    try {
-      localStorage.setItem('mw_ocr_last_image', base64);
-      localStorage.setItem('mw_ocr_last_mime', mimeType);
-      localStorage.setItem('mw_ocr_last_ts', Date.now().toString());
-    } catch(e) {}
-    return true;
-  }
-
-  function showAutoBanner(msg) {
-    const banner = document.getElementById('auto-banner');
-    banner.textContent = msg || '⚡ Extension থেকে ছবি পেয়েছি — Auto Extracting...';
-    banner.classList.add('show');
-    setTimeout(() => banner.classList.remove('show'), 5000);
-  }
-
   function loadImage(file) {
     const reader = new FileReader();
     reader.onload = ev => {
@@ -432,59 +486,53 @@
       previewImg.src = dataUrl;
       dropZone.classList.add('has-image');
       currentImageBase64 = dataUrl.split(',')[1];
-      currentImageMime = file.type || 'image/png';
       document.getElementById('extract-btn').disabled = false;
       setStatus('idle', 'Image loaded — click Extract Dates');
     };
     reader.readAsDataURL(file);
   }
 
-  // ════════════════════════════════════════════════
-  // 🔥 OpenRouter API — Gemini 2.5 Flash
-  // ════════════════════════════════════════════════
+  // ── Main Extract Function — Google AI Studio Gemini 2.5 Flash ──
   async function extractDates() {
     if (!currentImageBase64) return;
 
-    const KEY = localStorage.getItem('openrouter_key') || '';
+    const KEY = localStorage.getItem('gemini_key') || '';
     if (!KEY) {
-      setStatus('error', '✗ OpenRouter Key নেই — উপরে OPENROUTER KEY বক্সে দিন');
+      setStatus('error', '✗ Gemini API Key নেই — aistudio.google.com/apikey থেকে ফ্রি key নিন');
       return;
     }
 
-    setStatus('running', 'Gemini 2.5 Flash (OpenRouter)-এ পাঠানো হচ্ছে...');
+    setStatus('running', 'Gemini 2.5 Flash-এ পাঠানো হচ্ছে...');
     document.getElementById('extract-btn').disabled = true;
     const emptyEl = document.getElementById('empty-state');
     if (emptyEl) emptyEl.style.display = 'none';
     document.getElementById('results-area').innerHTML = '';
 
     try {
-      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      // Google AI Studio Gemini API endpoint
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${KEY}`;
+
+      const resp = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + KEY,
-          'HTTP-Referer': window.location.href,
-          'X-Title': 'MW Date Extractor'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [{
-            role: 'user',
-            content: [
+          contents: [{
+            parts: [
               {
-                type: 'image_url',
-                image_url: {
-                  url: 'data:' + (currentImageMime || 'image/png') + ';base64,' + currentImageBase64
+                inline_data: {
+                  mime_type: 'image/png',
+                  data: currentImageBase64
                 }
               },
               {
-                type: 'text',
                 text: 'Look at this image. Find ALL rows in the Datum column — including rows where the date is crossed out or marked with an X. For normal dates return day/month/raw. For crossed-out or X-marked dates set blank:true and raw:"X". Return ONLY valid JSON, no markdown, no explanation: {"year":"2026","dates":[{"num":1,"raw":"23.02.26","day":"23","month":"02","blank":false},{"num":2,"raw":"X","blank":true}]}'
               }
             ]
           }],
-          max_tokens: 1000,
-          temperature: 0
+          generationConfig: {
+            temperature: 0,
+            maxOutputTokens: 1000
+          }
         })
       });
 
@@ -492,7 +540,7 @@
 
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-      const rawText = data.choices?.[0]?.message?.content || '';
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const clean = rawText.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
@@ -507,7 +555,17 @@
         localStorage.setItem('mw_ocr_last_dates', JSON.stringify(extractedDates));
         localStorage.setItem('mw_ocr_last_year', parsed.year || '');
         localStorage.setItem('mw_ocr_last_result_ts', Date.now().toString());
-      } catch(e) {}
+      } catch(e) { console.warn('[MW Extractor] result save failed:', e); }
+
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({
+            mw_ocr_last_dates: extractedDates,
+            mw_ocr_last_year: parsed.year || '',
+            mw_ocr_last_result_ts: Date.now()
+          });
+        }
+      } catch(e) { console.warn('[MW Extractor] chrome.storage save failed:', e); }
 
     } catch (err) {
       console.error(err);
